@@ -1,0 +1,3059 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Файловая система и программное обеспечение — интерактивный тренажёр (6 класс)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f4f7fb;
+    --card: #ffffff;
+    --ink: #1f2d3d;
+    --muted: #6b7c93;
+    --blue: #3b82f6;
+    --blue-d: #2563eb;
+    --green: #2ecc71;
+    --green-d: #27ae60;
+    --red: #e74c3c;
+    --yellow: #f1c40f;
+    --orange: #f59e0b;
+    --purple: #8b5cf6;
+    --border: #dbe4f0;
+    --shadow: 0 10px 28px rgba(31, 45, 61, .09);
+    --shadow-sm: 0 4px 12px rgba(31, 45, 61, .08);
+  }
+
+  html, body { height: 100%; }
+
+  body {
+    font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 17px;
+    line-height: 1.55;
+    color: var(--ink);
+    background: linear-gradient(160deg, #eef4ff 0%, #f8fbff 45%, #eefaf3 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .screen { display: none; }
+  .screen.active { display: block; animation: fadeIn .35s ease; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .wrap {
+    max-width: 1020px;
+    margin: 0 auto;
+    padding: 20px 22px 46px;
+  }
+
+  /* ---------------- LOGIN ---------------- */
+
+  #screen-login {
+    min-height: 100vh;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  #screen-login.active { display: flex; }
+
+  .login-card {
+    width: 100%;
+    max-width: 560px;
+    background: var(--card);
+    border-radius: 24px;
+    box-shadow: var(--shadow);
+    padding: 42px 40px 38px;
+    text-align: center;
+    border: 1px solid var(--border);
+  }
+
+  .login-logo {
+    width: 86px;
+    height: 86px;
+    margin: 0 auto 18px;
+    border-radius: 24px;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 42px;
+    box-shadow: 0 10px 22px rgba(59, 130, 246, .35);
+  }
+
+  .login-card h1 {
+    font-size: 26px;
+    line-height: 1.3;
+    margin-bottom: 8px;
+    color: #16233a;
+  }
+
+  .login-card .subtitle {
+    color: var(--muted);
+    font-size: 16px;
+    margin-bottom: 26px;
+  }
+
+  .login-label {
+    display: block;
+    text-align: left;
+    font-weight: 600;
+    font-size: 15px;
+    margin-bottom: 8px;
+    color: #33465f;
+  }
+
+  #nameInput {
+    width: 100%;
+    padding: 14px 18px;
+    font-size: 18px;
+    font-family: inherit;
+    color: var(--ink);
+    border-radius: 14px;
+    border: 2px solid #2ecc71;
+    box-shadow: 0 0 8px rgba(46, 204, 113, 0.4);
+    outline: none;
+    transition: box-shadow .2s, border-color .2s;
+    background: #ffffff;
+  }
+
+  #nameInput:focus {
+    border-color: #27ae60;
+    box-shadow: 0 0 14px rgba(46, 204, 113, 0.65);
+  }
+
+  .login-hint {
+    font-size: 14px;
+    color: var(--muted);
+    margin-top: 10px;
+    text-align: left;
+    min-height: 20px;
+  }
+
+  .login-hint.ok { color: var(--green-d); font-weight: 600; }
+
+  /* ---------------- BUTTONS ---------------- */
+
+  .btn {
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 600;
+    padding: 12px 26px;
+    border-radius: 14px;
+    border: none;
+    cursor: pointer;
+    transition: transform .12s ease, box-shadow .18s ease, background .18s ease, opacity .18s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    user-select: none;
+  }
+
+  .btn:active { transform: translateY(1px) scale(.99); }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: #fff;
+    box-shadow: 0 8px 18px rgba(37, 99, 235, .32);
+  }
+  .btn-primary:hover { box-shadow: 0 10px 22px rgba(37, 99, 235, .42); }
+
+  .btn-green {
+    background: linear-gradient(135deg, #34d399, #10b981);
+    color: #fff;
+    box-shadow: 0 8px 18px rgba(16, 185, 129, .32);
+  }
+  .btn-green:hover { box-shadow: 0 10px 22px rgba(16, 185, 129, .42); }
+
+  .btn-ghost {
+    background: #fff;
+    color: #3b4a60;
+    border: 2px solid var(--border);
+    box-shadow: var(--shadow-sm);
+  }
+  .btn-ghost:hover { border-color: #b9cbe4; }
+
+  .btn:disabled {
+    opacity: .45;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+  }
+
+  .btn-lg { font-size: 18px; padding: 15px 34px; border-radius: 16px; }
+
+  .hidden { display: none !important; }
+
+  /* ---------------- TOPBAR / PROGRESS ---------------- */
+
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 8px 18px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #3b4a60;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .chip-score { color: #2563eb; }
+  .chip-name { color: #7c3aed; }
+
+  .progress-track {
+    height: 10px;
+    background: #e3ecf7;
+    border-radius: 999px;
+    overflow: hidden;
+    margin-bottom: 20px;
+    box-shadow: inset 0 1px 3px rgba(31,45,61,.08);
+  }
+
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6, #10b981);
+    transition: width .35s ease;
+  }
+
+  /* ---------------- CARDS ---------------- */
+
+  .card {
+    background: var(--card);
+    border-radius: 22px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    padding: 28px 30px 26px;
+  }
+
+  .slide-card h3 {
+    font-size: 23px;
+    margin-bottom: 14px;
+    color: #16233a;
+    line-height: 1.3;
+  }
+
+  .slide-card p { margin-bottom: 12px; }
+
+  .term {
+    color: #2563eb;
+    background: linear-gradient(180deg, transparent 62%, #dbeafe 62%);
+    padding: 0 2px;
+    font-weight: 700;
+  }
+
+  .term-green {
+    color: #047857;
+    background: linear-gradient(180deg, transparent 62%, #d1fae5 62%);
+    padding: 0 2px;
+    font-weight: 700;
+  }
+
+  .term-red {
+    color: #b91c1c;
+    background: linear-gradient(180deg, transparent 62%, #fee2e2 62%);
+    padding: 0 2px;
+    font-weight: 700;
+  }
+
+  .note {
+    background: #f0f7ff;
+    border-left: 5px solid #3b82f6;
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 16px;
+    color: #2c4a75;
+    margin-top: 12px;
+  }
+
+  /* ---------------- THEORY VISUALS ---------------- */
+
+  .os-stack { margin: 18px 0 6px; }
+
+  .os-layer {
+    border-radius: 14px;
+    padding: 14px 18px;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 10px;
+    font-size: 16px;
+  }
+
+  .layer-app { background: #e0f2fe; color: #075985; border: 2px dashed #7dd3fc; }
+  .layer-os {
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    color: #fff;
+    font-size: 17px;
+    letter-spacing: .4px;
+    box-shadow: 0 8px 18px rgba(59,130,246,.3);
+  }
+  .layer-hw { background: #f1f5f9; color: #334155; border: 2px solid #cbd5e1; }
+
+  .cards-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin: 16px 0 8px;
+  }
+
+  .mini-card {
+    background: #f8fbff;
+    border: 2px solid #e3edfa;
+    border-radius: 16px;
+    padding: 16px 14px;
+    text-align: center;
+    transition: transform .18s, box-shadow .18s;
+  }
+
+  .mini-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-sm); }
+
+  .mc-icon { font-size: 30px; margin-bottom: 6px; }
+
+  .mini-card h4 { font-size: 16px; margin-bottom: 6px; color: #1e3a8a; }
+
+  .mini-card p { font-size: 14.5px; color: var(--muted); line-height: 1.45; margin: 0; }
+
+  .name-visual {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 2px;
+    margin: 26px 0 20px;
+    font-size: 40px;
+    font-weight: 800;
+    letter-spacing: 1px;
+  }
+
+  .nv-name { color: #2563eb; }
+  .nv-dot { color: #f59e0b; }
+  .nv-ext { color: #10b981; }
+
+  .legend-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+
+  .legend {
+    border-radius: 12px;
+    padding: 12px;
+    font-size: 14.5px;
+    text-align: center;
+    line-height: 1.4;
+  }
+
+  .legend-name { background: #dbeafe; color: #1e40af; }
+  .legend-dot { background: #fef3c7; color: #92400e; }
+  .legend-ext { background: #d1fae5; color: #065f46; }
+
+  .ext-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
+    margin: 16px 0 6px;
+  }
+
+  .ext-card {
+    background: #fff;
+    border: 2px solid #e3edfa;
+    border-radius: 14px;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: transform .16s, border-color .16s, box-shadow .16s;
+  }
+
+  .ext-card:hover { transform: translateY(-2px); border-color: #93c5fd; box-shadow: var(--shadow-sm); }
+
+  .ext-icon { font-size: 24px; }
+
+  .ext-code {
+    font-family: "Consolas", "Courier New", monospace;
+    font-weight: 700;
+    color: #2563eb;
+    font-size: 17px;
+    display: block;
+  }
+
+  .ext-desc { font-size: 14px; color: var(--muted); }
+
+  .folder-visual {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    justify-content: center;
+    margin: 22px 0;
+    flex-wrap: wrap;
+  }
+
+  .folder-shape {
+    width: 190px;
+    height: 130px;
+    background: linear-gradient(160deg, #fbbf24, #f59e0b);
+    border-radius: 12px;
+    position: relative;
+    box-shadow: 0 10px 20px rgba(245,158,11,.28);
+  }
+
+  .folder-shape::before {
+    content: "";
+    position: absolute;
+    top: -16px;
+    left: 0;
+    width: 80px;
+    height: 20px;
+    background: #fbbf24;
+    border-radius: 10px 12px 0 0;
+  }
+
+  .folder-shape span {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #7c2d12;
+    font-weight: 700;
+    font-size: 17px;
+  }
+
+  .folder-notes { max-width: 420px; }
+
+  .tree {
+    background: #f8fbff;
+    border: 2px solid #e3edfa;
+    border-radius: 16px;
+    padding: 18px 22px;
+    margin: 14px 0 8px;
+    font-size: 16px;
+  }
+
+  .tree-node {
+    padding: 4px 0;
+    color: #24405f;
+    font-weight: 500;
+  }
+
+  .tree-child {
+    margin-left: 24px;
+    padding-left: 16px;
+    border-left: 2px dashed #bcd3ee;
+  }
+
+  .rules-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 16px 0 6px;
+  }
+
+  .rule-box {
+    border-radius: 16px;
+    padding: 16px 18px;
+  }
+
+  .rule-ok { background: #ecfdf5; border: 2px solid #a7f3d0; }
+  .rule-bad { background: #fef2f2; border: 2px solid #fecaca; }
+
+  .rule-box h4 { font-size: 16px; margin-bottom: 10px; }
+  .rule-ok h4 { color: #047857; }
+  .rule-bad h4 { color: #b91c1c; }
+
+  .sym-row { display: flex; flex-wrap: wrap; gap: 8px; }
+
+  .sym {
+    font-family: "Consolas", "Courier New", monospace;
+    font-size: 18px;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 10px;
+    background: #fff;
+  }
+
+  .rule-ok .sym { color: #047857; border: 2px solid #6ee7b7; }
+  .rule-bad .sym { color: #b91c1c; border: 2px solid #fca5a5; }
+
+  .path-visual {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin: 18px 0 14px;
+    background: #f8fbff;
+    border: 2px solid #e3edfa;
+    border-radius: 16px;
+    padding: 18px;
+    justify-content: center;
+  }
+
+  .path-part {
+    padding: 8px 14px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 16px;
+    font-family: "Consolas", "Courier New", monospace;
+  }
+
+  .pp-disc { background: #dbeafe; color: #1e40af; }
+  .pp-folder { background: #fef3c7; color: #92400e; }
+  .pp-file { background: #d1fae5; color: #065f46; }
+  .path-slash { font-weight: 800; color: #94a3b8; font-size: 19px; }
+
+  .ops-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+    gap: 12px;
+    margin: 14px 0 6px;
+  }
+
+  .op-card {
+    background: #f8fbff;
+    border: 2px solid #e3edfa;
+    border-radius: 14px;
+    padding: 14px;
+    font-size: 15px;
+  }
+
+  .op-card b { display: block; color: #1e3a8a; margin-bottom: 4px; font-size: 15.5px; }
+
+  .tips-list { list-style: none; margin: 12px 0 4px; }
+
+  .tips-list li {
+    padding: 10px 14px 10px 44px;
+    position: relative;
+    background: #f8fbff;
+    border-radius: 12px;
+    margin-bottom: 9px;
+    border: 1px solid #e6eefb;
+    font-size: 15.5px;
+  }
+
+  .tips-list li::before {
+    content: "✓";
+    position: absolute;
+    left: 14px;
+    top: 9px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #10b981;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ---------------- NAV ROW ---------------- */
+
+  .nav-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-top: 20px;
+  }
+
+  .dots { display: flex; gap: 7px; flex-wrap: wrap; justify-content: center; }
+
+  .dot {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: #cbd9ea;
+    cursor: pointer;
+    transition: background .2s, transform .2s;
+  }
+
+  .dot.active { background: #3b82f6; transform: scale(1.35); }
+  .dot.done { background: #a7f3d0; }
+
+  .center-row { text-align: center; margin-top: 18px; }
+
+  /* ---------------- TASK ---------------- */
+
+  .task-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+
+  .task-type {
+    display: inline-block;
+    background: #eef2ff;
+    color: #4338ca;
+    font-size: 13.5px;
+    font-weight: 700;
+    padding: 5px 13px;
+    border-radius: 999px;
+    letter-spacing: .3px;
+    text-transform: uppercase;
+  }
+
+  .task-num { font-size: 14px; color: var(--muted); font-weight: 600; }
+
+  .task-head-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .hint-btn {
+    font-family: inherit;
+    font-size: 14.5px;
+    font-weight: 700;
+    padding: 7px 15px;
+    border-radius: 999px;
+    border: 2px solid #fbbf24;
+    background: #fffbeb;
+    color: #92400e;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    transition: background .16s, border-color .16s, transform .12s, box-shadow .16s;
+    user-select: none;
+  }
+
+  .hint-btn:hover {
+    background: #fef3c7;
+    border-color: #f59e0b;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(245, 158, 11, .25);
+  }
+
+  .hint-btn.active {
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    color: #fff;
+    border-color: #f59e0b;
+    box-shadow: 0 4px 12px rgba(245, 158, 11, .4);
+  }
+
+  .hint-bulb {
+    font-size: 17px;
+    display: inline-block;
+    transition: transform .2s;
+  }
+
+  .hint-btn.active .hint-bulb { transform: scale(1.15) rotate(-8deg); }
+
+  .hint-box {
+    background: linear-gradient(135deg, #fffbeb, #fef3c7);
+    border-left: 6px solid #f59e0b;
+    border-radius: 12px;
+    padding: 14px 18px;
+    font-size: 16px;
+    line-height: 1.55;
+    color: #78350f;
+    margin-bottom: 18px;
+    animation: hintIn .25s ease;
+  }
+
+  @keyframes hintIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .hint-box .hint-label {
+    display: block;
+    font-weight: 800;
+    font-size: 13px;
+    letter-spacing: .6px;
+    text-transform: uppercase;
+    color: #b45309;
+    margin-bottom: 6px;
+  }
+
+  .task-question {
+    font-size: 20px;
+    line-height: 1.45;
+    color: #16233a;
+    margin-bottom: 18px;
+    font-weight: 700;
+  }
+
+  .options { display: grid; gap: 11px; }
+
+  .option {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    text-align: left;
+    font-family: inherit;
+    font-size: 16.5px;
+    color: #22334a;
+    background: #f8fbff;
+    border: 2px solid #e0eaf7;
+    border-radius: 14px;
+    padding: 14px 18px;
+    cursor: pointer;
+    transition: border-color .16s, background .16s, transform .12s, box-shadow .16s;
+  }
+
+  .option:hover { border-color: #93c5fd; background: #f2f8ff; transform: translateX(3px); }
+
+  .option-letter {
+    flex: 0 0 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #e0eaf7;
+    color: #3b4a60;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+  }
+
+  .option.selected { border-color: #3b82f6; background: #eff6ff; box-shadow: 0 0 0 3px rgba(59,130,246,.14); }
+  .option.selected .option-letter { background: #3b82f6; color: #fff; }
+
+  .option.correct { border-color: #10b981; background: #ecfdf5; }
+  .option.correct .option-letter { background: #10b981; color: #fff; }
+
+  .option.wrong { border-color: #ef4444; background: #fef2f2; }
+  .option.wrong .option-letter { background: #ef4444; color: #fff; }
+
+  .tf-row { display: flex; gap: 16px; flex-wrap: wrap; }
+
+  .tf-btn {
+    flex: 1 1 180px;
+    font-family: inherit;
+    font-size: 19px;
+    font-weight: 700;
+    padding: 22px 20px;
+    border-radius: 16px;
+    border: 3px solid #e0eaf7;
+    background: #f8fbff;
+    color: #3b4a60;
+    cursor: pointer;
+    transition: all .16s;
+  }
+
+  .tf-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-sm); }
+
+  .tf-true.selected { border-color: #10b981; background: #ecfdf5; color: #047857; }
+  .tf-false.selected { border-color: #ef4444; background: #fef2f2; color: #b91c1c; }
+
+  .tf-btn.correct { border-color: #10b981; background: #ecfdf5; color: #047857; }
+  .tf-btn.wrong { border-color: #ef4444; background: #fef2f2; color: #b91c1c; }
+
+  /* -------- MATCH -------- */
+
+  .match-wrap {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+
+  .match-col { display: grid; gap: 10px; align-content: start; }
+
+  .match-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: inherit;
+    font-size: 16px;
+    text-align: left;
+    background: #f8fbff;
+    border: 2px solid #e0eaf7;
+    border-radius: 13px;
+    padding: 13px 16px;
+    cursor: pointer;
+    color: #22334a;
+    transition: border-color .16s, background .16s, transform .12s;
+  }
+
+  .match-item:hover { border-color: #93c5fd; transform: translateX(2px); }
+  .match-item.selected { border-color: #3b82f6; background: #eff6ff; box-shadow: 0 0 0 3px rgba(59,130,246,.14); }
+
+  .match-dot {
+    flex: 0 0 16px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #dbe6f5;
+    transition: background .2s;
+  }
+
+  .match-item.matched-ok { border-color: #10b981; background: #ecfdf5; }
+  .match-item.matched-bad { border-color: #ef4444; background: #fef2f2; }
+
+  .match-prog-icon {
+    font-size: 22px;
+    line-height: 1;
+    flex: 0 0 auto;
+  }
+
+  /* -------- CLASSIFY -------- */
+
+  .pool {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    min-height: 62px;
+    padding: 12px;
+    border-radius: 16px;
+    border: 2px dashed #c7d9ef;
+    background: #f8fbff;
+    margin-bottom: 16px;
+    align-content: flex-start;
+  }
+
+  .pool-title { font-size: 14px; color: var(--muted); font-weight: 600; margin-bottom: 8px; }
+
+  .chip-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 16px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #ffffff, #f2f8ff);
+    border: 2px solid #bcd6f5;
+    color: #1e3a8a;
+    font-weight: 600;
+    font-size: 15.5px;
+    cursor: grab;
+    user-select: none;
+    transition: transform .14s, box-shadow .14s, border-color .14s;
+    box-shadow: 0 2px 6px rgba(31,45,61,.06);
+  }
+
+  .chip-item:hover { transform: translateY(-2px); box-shadow: var(--shadow-sm); border-color: #60a5fa; }
+  .chip-item.selected { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,.2); }
+  .chip-item.dragging { opacity: .45; }
+
+  .cats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
+
+  .cat-box {
+    border-radius: 16px;
+    border: 2px solid #e0eaf7;
+    background: #fbfdff;
+    padding: 12px;
+    min-height: 130px;
+    transition: border-color .16s, background .16s;
+  }
+
+  .cat-box.over { border-color: #3b82f6; background: #eff6ff; }
+
+  .cat-title {
+    font-weight: 700;
+    color: #1e3a8a;
+    font-size: 16px;
+    margin-bottom: 10px;
+    text-align: center;
+    padding-bottom: 8px;
+    border-bottom: 2px dashed #dbe7f6;
+  }
+
+  .cat-items { display: flex; flex-wrap: wrap; gap: 8px; min-height: 46px; }
+
+  /* -------- PATH (drag & drop) -------- */
+
+  .slots-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    padding: 18px 14px;
+    border-radius: 16px;
+    background: #f8fbff;
+    border: 2px solid #e0eaf7;
+    margin-bottom: 16px;
+    justify-content: center;
+  }
+
+  .slot {
+    min-width: 108px;
+    min-height: 52px;
+    border-radius: 12px;
+    border: 2px dashed #b9d2f0;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+    transition: border-color .16s, background .16s;
+  }
+
+  .slot.over { border-color: #3b82f6; background: #eff6ff; }
+  .slot.filled { border-style: solid; border-color: #cfe0f5; }
+  .slot .chip-item { cursor: grab; }
+
+  .path-sep { font-size: 22px; font-weight: 800; color: #94a3b8; }
+
+  /* -------- FEEDBACK -------- */
+
+  .feedback {
+    margin-top: 18px;
+    padding: 14px 18px;
+    border-radius: 14px;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.5;
+    animation: fadeIn .25s ease;
+  }
+
+  .feedback.ok { background: #ecfdf5; border-left: 6px solid #10b981; color: #065f46; }
+  .feedback.bad { background: #fef2f2; border-left: 6px solid #ef4444; color: #991b1b; }
+  .feedback.warn { background: #fffbeb; border-left: 6px solid #f59e0b; color: #92400e; }
+
+  .task-footer {
+    display: flex;
+    gap: 14px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+  }
+
+  /* ---------------- TEST / DESCRIPTOR ---------------- */
+
+  .descriptor {
+    background: linear-gradient(135deg, #eef4ff, #f5f0ff);
+    border: 2px solid #dbe4fa;
+    border-radius: 18px;
+    padding: 22px 24px;
+    margin-bottom: 18px;
+  }
+
+  .descriptor h3 { font-size: 21px; margin-bottom: 10px; color: #1e3a8a; }
+
+  .descriptor ul { margin: 10px 0 0 20px; }
+  .descriptor li { margin-bottom: 6px; font-size: 16px; }
+
+  .block-badge {
+    display: inline-block;
+    background: #3b82f6;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 5px 15px;
+    border-radius: 999px;
+    margin-bottom: 12px;
+    letter-spacing: .4px;
+  }
+
+  .block-badge.b { background: linear-gradient(135deg, #8b5cf6, #6d28d9); }
+
+  /* ---------------- FINAL ---------------- */
+
+  .final-card {
+    text-align: center;
+    padding: 34px 34px 30px;
+  }
+
+  .final-name {
+    font-size: 26px;
+    font-weight: 700;
+    color: #16233a;
+    margin-bottom: 6px;
+  }
+
+  .final-sub { color: var(--muted); font-size: 16px; margin-bottom: 24px; }
+
+  .score-circle {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    margin: 0 auto 22px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    box-shadow: 0 16px 34px rgba(31,45,61,.2);
+    animation: pop .45s ease;
+  }
+
+  @keyframes pop {
+    0% { transform: scale(.7); opacity: 0; }
+    70% { transform: scale(1.06); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  .score-circle .num { font-size: 62px; font-weight: 800; line-height: 1; }
+  .score-circle .of { font-size: 20px; opacity: .92; margin-top: 4px; }
+
+  .score-green { background: linear-gradient(135deg, #34d399, #059669); }
+  .score-blue { background: linear-gradient(135deg, #60a5fa, #2563eb); }
+  .score-yellow { background: linear-gradient(135deg, #fbbf24, #d97706); }
+  .score-red { background: linear-gradient(135deg, #f87171, #dc2626); }
+
+  .percent-badge {
+    display: inline-block;
+    background: #eef4ff;
+    color: #1e40af;
+    font-size: 18px;
+    font-weight: 700;
+    padding: 10px 24px;
+    border-radius: 999px;
+    margin-bottom: 24px;
+  }
+
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 14px;
+    margin-bottom: 26px;
+    text-align: left;
+  }
+
+  .sum-card {
+    background: #f8fbff;
+    border: 2px solid #e3edfa;
+    border-radius: 16px;
+    padding: 16px 18px;
+  }
+
+  .sum-card h4 {
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: #7b8ca6;
+    margin-bottom: 8px;
+  }
+
+  .sum-card .val { font-size: 22px; font-weight: 800; color: #1e3a8a; }
+  .sum-card .det { font-size: 14.5px; color: var(--muted); margin-top: 4px; }
+
+  /* ---------------- RESPONSIVE ---------------- */
+
+  @media (max-width: 900px) {
+    .cards-3 { grid-template-columns: 1fr; }
+    .rules-grid { grid-template-columns: 1fr; }
+    .legend-row { grid-template-columns: 1fr; }
+    .match-wrap { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 640px) {
+    body { font-size: 16px; }
+    .wrap { padding: 14px 14px 36px; }
+    .card { padding: 20px 18px; }
+    .login-card { padding: 30px 22px; }
+    .name-visual { font-size: 30px; }
+    .task-question { font-size: 18px; }
+  }
+
+/* ===== ШКОЛЬНЫЙ СТИЛЬ · КРУПНЫЙ ШРИФТ ДЛЯ НОУТБУКОВ ===== */
+:root{ --board:#1f5f4a; --notebook:#fffef7; }
+body{
+  font-family: Verdana, "Segoe UI", Tahoma, Arial, sans-serif !important;
+  font-size: 21px !important; line-height: 1.65 !important;
+  background-color:#fbf8ee !important;
+  background-image:
+    linear-gradient(90deg, transparent 58px, rgba(220,70,70,.35) 58px, rgba(220,70,70,.35) 60px, transparent 60px),
+    linear-gradient(rgba(70,130,200,.16) 1px, transparent 1px) !important;
+  background-size: 100% 100%, 100% 34px !important;
+  background-attachment: fixed !important;
+}
+.wrap{ max-width:1180px !important; padding:22px 28px 56px 84px !important; }
+.card{ background:var(--notebook) !important; border:3px solid #cfd8e6 !important; border-radius:18px !important; padding:34px 40px 32px !important; box-shadow:0 6px 0 #d9e1ee !important; }
+.login-card{ border:3px solid #cfd8e6 !important; box-shadow:0 6px 0 #d9e1ee !important; max-width:680px !important; }
+.login-card h1{ font-size:32px !important; color:var(--board) !important; }
+.login-card .subtitle, .login-label{ font-size:20px !important; }
+#nameInput{ font-size:22px !important; padding:16px 20px !important; }
+.login-hint{ font-size:18px !important; }
+.slide-card h3{ font-size:30px !important; color:var(--board) !important; border-bottom:3px dashed #9fd3bf; padding-bottom:10px; }
+.slide-card p, .slide-card li{ font-size:21px !important; }
+.note{ font-size:19px !important; }
+.os-layer,.layer-os,.tree,.folder-shape span,.path-part,.ext-code,.chip-item,.match-item,.cat-title{ font-size:19px !important; }
+.mini-card h4,.rule-box h4,.op-card b,.op-card{ font-size:19px !important; }
+.mini-card p,.ext-desc,.legend,.tips-list li,.pool-title{ font-size:17.5px !important; }
+.sym{ font-size:22px !important; }
+.name-visual{ font-size:46px !important; }
+.btn{ font-size:20px !important; padding:14px 30px !important; border-radius:12px !important; }
+.btn-lg{ font-size:22px !important; padding:18px 38px !important; }
+.chip{ font-size:18px !important; padding:10px 20px !important; border-radius:12px !important; }
+.progress-track{ height:14px !important; }
+.task-type{ font-size:16px !important; }
+.task-num,.hint-btn,.hint-box,.hint-box .hint-label{ font-size:17px !important; }
+.task-question{ font-size:26px !important; line-height:1.5 !important; color:#14233b !important; }
+.option{ font-size:21px !important; padding:16px 20px !important; }
+.option-letter{ font-size:18px !important; }
+.tf-btn{ font-size:23px !important; }
+.feedback{ font-size:20px !important; padding:16px 20px !important; }
+.descriptor h3{ font-size:26px !important; }
+.descriptor li{ font-size:20px !important; }
+.block-badge{ font-size:16px !important; }
+.final-name{ font-size:34px !important; }
+.final-sub{ font-size:20px !important; }
+.score-circle .num{ font-size:76px !important; }
+.score-circle .of{ font-size:22px !important; }
+.percent-badge{ font-size:21px !important; }
+.sum-card h4{ font-size:17px !important; }
+.sum-card .val{ font-size:28px !important; }
+.sum-card .det{ font-size:17.5px !important; }
+.dot{ width:16px !important; height:16px !important; }
+.dot.locked{ background:#e3e8ef !important; cursor:not-allowed !important; opacity:.7; }
+/* чекбокс «прочитал» */
+.read-check{
+  margin-top:22px; display:flex; align-items:center; gap:16px;
+  background:#fff8d6; border:3px dashed #e0b400; border-radius:14px;
+  padding:16px 22px; cursor:pointer; font-size:22px; font-weight:700; color:#5b4600;
+  user-select:none; transition:background .2s, border-color .2s;
+}
+.read-check input{ width:32px; height:32px; accent-color:#10b981; cursor:pointer; flex:none; }
+.read-check.checked{ background:#e8fbf1; border:3px solid #10b981; color:#065f46; }
+.read-lock-msg{ text-align:center; color:#92400e; font-size:18px; margin-top:12px; font-weight:600; }
+@media (max-width:760px){ .wrap{ padding:16px 16px 40px 16px !important; } body{ font-size:18px !important; } }
+</style>
+</head>
+<body>
+
+<!-- ================= ЭКРАН 0: АВТОРИЗАЦИЯ ================= -->
+<section id="screen-login" class="screen active">
+  <div class="login-card">
+    <div class="login-logo">🗂️</div>
+    <h1>Файловая система и программное обеспечение</h1>
+    <p class="subtitle">Интерактивный тренажёр по информатике · 6 класс</p>
+
+    <label class="login-label" for="nameInput">Введите своё имя:</label>
+    <input type="text" id="nameInput" placeholder="" autocomplete="off" spellcheck="false">
+    <div class="login-hint" id="loginHint">Введите не менее 2 символов, чтобы начать.</div>
+
+    <div style="margin-top:22px;">
+      <button class="btn btn-green btn-lg" id="btnStart" disabled>Начать урок</button>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ЭКРАН 1: ТЕОРИЯ ================= -->
+<section id="screen-theory" class="screen">
+  <div class="wrap">
+    <div class="topbar">
+      <span class="chip">📖 Слайд <span id="slideNow">1</span> из 10</span>
+      <span class="chip chip-name" id="theoryName"></span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="theoryBar"></div></div>
+
+    <div class="card slide-card" id="slideCard"></div>
+
+    <div class="nav-row">
+      <button class="btn btn-ghost" id="btnPrevSlide">← Назад</button>
+      <div class="dots" id="slideDots"></div>
+      <button class="btn btn-primary" id="btnNextSlide">Далее →</button>
+    </div>
+
+    <div class="center-row">
+      <button class="btn btn-green btn-lg hidden" id="btnToTrainer">Перейти к тренажёру →</button>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ЭКРАН 2: ТРЕНАЖЁР ================= -->
+<section id="screen-trainer" class="screen">
+  <div class="wrap">
+    <div class="topbar">
+      <span class="chip" id="trainerProgress">Задание 1 из 30</span>
+      <span class="chip chip-score" id="trainerScore">Верно: 0</span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="trainerBar"></div></div>
+    <div class="card" id="taskCard"></div>
+  </div>
+</section>
+
+<!-- ================= ЭКРАН 3: ТЕСТ ================= -->
+<section id="screen-test" class="screen">
+  <div class="wrap">
+    <div class="topbar">
+      <span class="chip" id="testProgress">Итоговый тест</span>
+      <span class="chip chip-score" id="testScore">Верно: 0 / 20</span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="testBar"></div></div>
+    <div class="card" id="testCard"></div>
+  </div>
+</section>
+
+<!-- ================= ЭКРАН 4: ИТОГ ================= -->
+<section id="screen-final" class="screen">
+  <div class="wrap">
+    <div class="card final-card">
+      <div class="final-name" id="finalName"></div>
+      <div class="final-sub">Итоговая работа по теме «Файловая система и программное обеспечение»</div>
+
+      <div class="score-circle" id="scoreCircle">
+        <div class="num" id="finalScore">0</div>
+        <div class="of">из 10 баллов</div>
+      </div>
+
+      <div class="percent-badge" id="finalPercent">0% правильных ответов</div>
+
+      <div class="summary-grid" id="summaryGrid"></div>
+
+      <button class="btn btn-primary btn-lg" id="btnRestart">Пройти заново</button>
+    </div>
+  </div>
+</section>
+
+<script>
+/* =========================================================
+   ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+   ========================================================= */
+
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+
+let audioCtx = null;
+function beep(freq, dur, type) {
+  try {
+    if (!audioCtx) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      audioCtx = new AC();
+    }
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = type || 'sine';
+    o.frequency.value = freq;
+    g.gain.setValueAtTime(0.09, audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.0008, audioCtx.currentTime + dur);
+    o.connect(g);
+    g.connect(audioCtx.destination);
+    o.start();
+    o.stop(audioCtx.currentTime + dur);
+  } catch (e) { /* звук недоступен — не критично */ }
+}
+
+function soundOk() { beep(740, 0.14, 'sine'); setTimeout(() => beep(1050, 0.18, 'sine'), 110); }
+function soundBad() { beep(230, 0.28, 'sawtooth'); }
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById(id);
+  if (el) el.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* =========================================================
+   СОСТОЯНИЕ
+   ========================================================= */
+
+const state = {
+  name: '',
+  slide: 0,
+  taskIndex: 0,
+  taskResults: [],
+  testPhase: 'introA',
+  testIdx: 0,
+  testResults: new Array(20).fill(null)
+};
+
+/* =========================================================
+   ЭТАП 0 — АВТОРИЗАЦИЯ
+   ========================================================= */
+
+const nameInput = document.getElementById('nameInput');
+const btnStart = document.getElementById('btnStart');
+const loginHint = document.getElementById('loginHint');
+
+nameInput.addEventListener('input', () => {
+  const v = nameInput.value.trim();
+  if (v.length >= 2) {
+    btnStart.disabled = false;
+    loginHint.textContent = 'Отлично! Можно начинать урок.';
+    loginHint.classList.add('ok');
+  } else {
+    btnStart.disabled = true;
+    loginHint.textContent = 'Введите не менее 2 символов, чтобы начать.';
+    loginHint.classList.remove('ok');
+  }
+});
+
+nameInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !btnStart.disabled) btnStart.click();
+});
+
+btnStart.addEventListener('click', () => {
+  const v = nameInput.value.trim();
+  if (v.length < 2) return;
+  state.name = v;
+  state.slide = 0;
+  slideRead.fill(false);
+  document.getElementById('theoryName').textContent = '👤 ' + state.name;
+  buildDots();
+  renderSlide();
+  showScreen('screen-theory');
+});
+
+/* =========================================================
+   ЭТАП 1 — ТЕОРИЯ (10 СЛАЙДОВ)
+   ========================================================= */
+
+const THEORY = [
+  {
+    title: 'Слайд 1. Что такое операционная система',
+    html: `
+      <p>Компьютер сам по себе — это просто набор «железа». Оживляет его
+      <span class="term">операционная система</span>.</p>
+      <p><b>Операционная система (ОС)</b> — это главная (системная) программа,
+      которая управляет работой всех устройств компьютера и обеспечивает работу других программ.</p>
+      <div class="os-stack">
+        <div class="os-layer layer-app">Прикладные программы: Word (ворд), Paint (пэйнт), браузер, игры</div>
+        <div class="os-layer layer-os">ОПЕРАЦИОННАЯ СИСТЕМА — Windows (виндовс), Linux (линукс), macOS (макос), Android (андроид)</div>
+        <div class="os-layer layer-hw">Аппаратное обеспечение: процессор, память, диск, клавиатура, мышь</div>
+      </div>
+      <p class="note">ОС запускается сразу после включения компьютера и работает до самого выключения.</p>
+    `
+  },
+  {
+    title: 'Слайд 2. Основные функции операционной системы',
+    html: `
+      <p>Операционная система решает три главные задачи:</p>
+      <div class="cards-3">
+        <div class="mini-card">
+          <div class="mc-icon">⚙️</div>
+          <h4>Управление устройствами</h4>
+          <p>ОС «командует» процессором, памятью, дисками, мышью, клавиатурой и принтером.</p>
+        </div>
+        <div class="mini-card">
+          <div class="mc-icon">📁</div>
+          <h4>Работа с файлами</h4>
+          <p>Создаёт, хранит, находит, копирует и удаляет файлы и папки.</p>
+        </div>
+        <div class="mini-card">
+          <div class="mc-icon">🖥️</div>
+          <h4>Интерфейс для человека</h4>
+          <p>Даёт удобные окна, меню, значки и панель задач для работы.</p>
+        </div>
+      </div>
+      <p class="note">Примеры ОС: <b>Windows (виндовс)</b>, <b>Linux (линукс)</b>, <b>macOS (макос)</b>, <b>Android (андроид)</b>, <b>iOS (ай-оу-эс)</b>.</p>
+    `
+  },
+  {
+    title: 'Слайд 3. Что такое файл и из чего состоит его имя',
+    html: `
+      <p><b>Файл</b> — это <span class="term">поименованная область на диске</span>, в которой хранится
+      информация: текст, рисунок, музыка, видео или программа.</p>
+      <div class="name-visual">
+        <span class="nv-name">Урок</span><span class="nv-dot">.</span><span class="nv-ext">docx</span>
+      </div>
+      <div class="legend-row">
+        <div class="legend legend-name"><b>Имя файла</b><br>придумывает человек</div>
+        <div class="legend legend-dot"><b>Точка</b><br>разделяет имя и расширение</div>
+        <div class="legend legend-ext"><b>Расширение</b><br>указывает тип файла</div>
+      </div>
+      <p class="note">Полное имя файла = <b>Имя</b> + <b>точка</b> + <b>расширение</b>. Например: <b>Отчёт.docx</b></p>
+    `
+  },
+  {
+    title: 'Слайд 4. Популярные расширения файлов',
+    html: `
+      <p>Расширение подсказывает компьютеру, какой программой открывать файл.</p>
+      <div class="ext-grid">
+        <div class="ext-card"><span class="ext-icon">📄</span><span><span class="ext-code">.docx</span><span class="ext-desc">Документ Word (ворд)</span></span></div>
+        <div class="ext-card"><span class="ext-icon">📊</span><span><span class="ext-code">.xlsx</span><span class="ext-desc">Таблица Excel (эксель)</span></span></div>
+        <div class="ext-card"><span class="ext-icon">📽️</span><span><span class="ext-code">.pptx</span><span class="ext-desc">Презентация PowerPoint (пауэр-пойнт)</span></span></div>
+        <div class="ext-card"><span class="ext-icon">🖼️</span><span><span class="ext-code">.jpg</span><span class="ext-desc">Рисунок</span></span></div>
+        <div class="ext-card"><span class="ext-icon">🌄</span><span><span class="ext-code">.png</span><span class="ext-desc">Рисунок с прозрачностью</span></span></div>
+        <div class="ext-card"><span class="ext-icon">🎵</span><span><span class="ext-code">.mp3</span><span class="ext-desc">Звукозапись</span></span></div>
+        <div class="ext-card"><span class="ext-icon">🎬</span><span><span class="ext-code">.mp4</span><span class="ext-desc">Видеофильм</span></span></div>
+        <div class="ext-card"><span class="ext-icon">🚀</span><span><span class="ext-code">.exe</span><span class="ext-desc">Программа</span></span></div>
+        <div class="ext-card"><span class="ext-icon">🐍</span><span><span class="ext-code">.py</span><span class="ext-desc">Программа на Python (пайтон)</span></span></div>
+        <div class="ext-card"><span class="ext-icon">📝</span><span><span class="ext-code">.txt</span><span class="ext-desc">Простой текст</span></span></div>
+      </div>
+      <p class="note">Запомни: расширение пишется после точки и обычно состоит из 3–4 латинских букв.</p>
+    `
+  },
+  {
+    title: 'Слайд 5. Папка (каталог)',
+    html: `
+      <p><b>Папка</b> (или <b>каталог</b>) — это <span class="term">контейнер</span>, в котором хранятся
+      файлы и другие папки. Папки нужны, чтобы наводить порядок и быстро находить нужное.</p>
+      <div class="folder-visual">
+        <div class="folder-shape"><span>📁 Школа</span></div>
+        <div class="folder-notes">
+          <p>Внутри одной папки могут лежать:</p>
+          <ul style="margin-left:20px;">
+            <li>файлы (например, <b>Урок.docx</b>);</li>
+            <li>другие папки (например, <b>Фото</b>).</li>
+          </ul>
+        </div>
+      </div>
+      <p class="note">Если бы папок не было, все файлы лежали бы в одной куче, и найти нужный было бы почти невозможно.</p>
+    `
+  },
+  {
+    title: 'Слайд 6. Иерархическая (древовидная) структура',
+    html: `
+      <p>Файлы и папки на компьютере образуют <span class="term">дерево</span>. На самом верху — диски,
+      внутри них — папки, внутри папок — подпапки и файлы.</p>
+      <div class="tree">
+        <div class="tree-node">💽 <b>Локальный диск C:</b></div>
+        <div class="tree-child">
+          <div class="tree-node">📁 Школа</div>
+          <div class="tree-child">
+            <div class="tree-node">📁 Информатика</div>
+            <div class="tree-child">
+              <div class="tree-node">📁 6_класс</div>
+              <div class="tree-child">
+                <div class="tree-node">📄 Урок.docx</div>
+                <div class="tree-node">📄 Задача.py</div>
+              </div>
+            </div>
+            <div class="tree-node">📄 Список.txt</div>
+          </div>
+          <div class="tree-node">📁 Фото</div>
+          <div class="tree-child">
+            <div class="tree-node">🖼️ Море.jpg</div>
+          </div>
+        </div>
+      </div>
+      <p class="note">Такая структура называется <b>иерархической</b>: каждый объект имеет своё место.</p>
+    `
+  },
+  {
+    title: 'Слайд 7. Правила именования файлов',
+    html: `
+      <p>Имя файла может быть длинным, но есть строгие ограничения.</p>
+      <div class="rules-grid">
+        <div class="rule-box rule-ok">
+          <h4>✅ Можно использовать</h4>
+          <div class="sym-row">
+            <span class="sym">А-Я</span>
+            <span class="sym">A-Z</span>
+            <span class="sym">0-9</span>
+            <span class="sym">_</span>
+            <span class="sym">-</span>
+            <span class="sym">пробел</span>
+          </div>
+        </div>
+        <div class="rule-box rule-bad">
+          <h4>❌ Нельзя использовать</h4>
+          <div class="sym-row">
+            <span class="sym">\\</span>
+            <span class="sym">/</span>
+            <span class="sym">:</span>
+            <span class="sym">*</span>
+            <span class="sym">?</span>
+            <span class="sym">"</span>
+            <span class="sym">&lt;</span>
+            <span class="sym">&gt;</span>
+            <span class="sym">|</span>
+          </div>
+        </div>
+      </div>
+      <p class="note">Эти девять символов <b>\\ / : * ? " &lt; &gt; |</b> компьютер использует для служебных целей,
+      поэтому в именах файлов их писать нельзя.</p>
+    `
+  },
+  {
+    title: 'Слайд 8. Полный путь к файлу',
+    html: `
+      <p><b>Путь к файлу</b> — это «адрес», по которому файл находится на компьютере.
+      Он начинается с имени диска и перечисляет все папки по порядку.</p>
+      <div class="path-visual">
+        <span class="path-part pp-disc">C:</span>
+        <span class="path-slash">\\</span>
+        <span class="path-part pp-folder">Школа</span>
+        <span class="path-slash">\\</span>
+        <span class="path-part pp-folder">Информатика</span>
+        <span class="path-slash">\\</span>
+        <span class="path-part pp-folder">6_класс</span>
+        <span class="path-slash">\\</span>
+        <span class="path-part pp-file">Урок.docx</span>
+      </div>
+      <p>Читается так: «на диске <b>C:</b> в папке <b>Школа</b> есть папка <b>Информатика</b>,
+      в ней папка <b>6_класс</b>, а в ней лежит файл <b>Урок.docx</b>».</p>
+      <p class="note">Полный путь: <b>C:\\Школа\\Информатика\\6_класс\\Урок.docx</b></p>
+    `
+  },
+  {
+    title: 'Слайд 9. Базовые операции с файлами',
+    html: `
+      <p>С файлами и папками можно выполнять основные действия:</p>
+      <div class="ops-grid">
+        <div class="op-card"><b>Создать</b>Появляется новый файл или папка.</div>
+        <div class="op-card"><b>Копировать</b>Появляется вторая копия объекта, оригинал остаётся на месте.</div>
+        <div class="op-card"><b>Переместить</b>Объект исчезает из старой папки и появляется в новой.</div>
+        <div class="op-card"><b>Переименовать</b>Меняется имя, а содержимое остаётся прежним.</div>
+        <div class="op-card"><b>Удалить</b>Объект попадает в Корзину, откуда его можно восстановить.</div>
+        <div class="op-card"><b>Открыть</b>Файл запускается в подходящей программе.</div>
+      </div>
+      <p class="note">Главное отличие: при <b>копировании</b> объектов становится два, а при <b>перемещении</b> — по-прежнему один.</p>
+    `
+  },
+  {
+    title: 'Слайд 10. Цифровая гигиена: порядок в файловой системе',
+    html: `
+      <p>Чтобы компьютер не превратился в свалку, соблюдай простые правила:</p>
+      <ul class="tips-list">
+        <li>Давай файлам понятные имена: <b>Доклад_История.docx</b>, а не <b>ффф1.docx</b>.</li>
+        <li>Создавай папки по темам: <b>Школа</b>, <b>Фото</b>, <b>Музыка</b>.</li>
+        <li>Не храни все файлы на Рабочем столе — он для работы, а не для склада.</li>
+        <li>Регулярно удаляй ненужное и очищай Корзину.</li>
+        <li>Делай резервные копии важных файлов на флешку или в облако.</li>
+        <li>Не удаляй системные файлы и папки Windows (виндовс) — компьютер может перестать работать.</li>
+        <li>Проверяй файлы антивирусом, особенно скачанные из интернета.</li>
+      </ul>
+      <p class="note">Порядок в файлах экономит время и спасает от потери важных данных.</p>
+    `
+  }
+];
+
+const slideCard = document.getElementById('slideCard');
+const slideNow = document.getElementById('slideNow');
+const theoryBar = document.getElementById('theoryBar');
+const btnPrevSlide = document.getElementById('btnPrevSlide');
+const btnNextSlide = document.getElementById('btnNextSlide');
+const btnToTrainer = document.getElementById('btnToTrainer');
+const slideDots = document.getElementById('slideDots');
+const slideRead = new Array(THEORY.length).fill(false);
+
+function maxOpenSlide() {
+  // доступны все прочитанные слайды и ближайший за ними
+  let k = 0;
+  while (k < THEORY.length - 1 && slideRead[k]) k++;
+  return k;
+}
+
+function buildDots() {
+  slideDots.innerHTML = '';
+  THEORY.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot';
+    d.addEventListener('click', () => {
+      if (i > maxOpenSlide()) return;   // нельзя перепрыгнуть непрочитанное
+      state.slide = i;
+      renderSlide();
+    });
+    slideDots.appendChild(d);
+  });
+}
+
+function renderSlide() {
+  const s = THEORY[state.slide];
+  slideCard.innerHTML = '<h3>' + s.title + '</h3>' + s.html;
+
+  // чекбокс «Прочитал(а)»
+  const lab = document.createElement('label');
+  lab.className = 'read-check' + (slideRead[state.slide] ? ' checked' : '');
+  const cb = document.createElement('input');
+  cb.type = 'checkbox';
+  cb.checked = slideRead[state.slide];
+  const tx = document.createElement('span');
+  tx.textContent = 'Я прочитал(а) этот слайд';
+  lab.append(cb, tx);
+  slideCard.appendChild(lab);
+  const msg = document.createElement('div');
+  msg.className = 'read-lock-msg';
+  msg.textContent = '☝ Отметь галочку — тогда кнопка «Далее» станет активной.';
+  msg.classList.toggle('hidden', slideRead[state.slide]);
+  slideCard.appendChild(msg);
+
+  cb.addEventListener('change', () => {
+    slideRead[state.slide] = cb.checked;
+    // если сняли галочку — закрываем все слайды после текущего
+    if (!cb.checked) for (let j = state.slide + 1; j < THEORY.length; j++) slideRead[j] = false;
+    lab.classList.toggle('checked', cb.checked);
+    msg.classList.toggle('hidden', cb.checked);
+    updateTheoryNav();
+  });
+
+  slideNow.textContent = String(state.slide + 1);
+  theoryBar.style.width = ((state.slide + 1) / THEORY.length * 100) + '%';
+  updateTheoryNav();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function updateTheoryNav() {
+  const read = slideRead[state.slide];
+  btnPrevSlide.disabled = state.slide === 0;
+
+  if (state.slide === THEORY.length - 1) {
+    btnNextSlide.classList.add('hidden');
+    btnToTrainer.classList.remove('hidden');
+    btnToTrainer.disabled = !read;
+  } else {
+    btnNextSlide.classList.remove('hidden');
+    btnToTrainer.classList.add('hidden');
+    btnNextSlide.disabled = !read;
+  }
+
+  const mx = maxOpenSlide();
+  slideDots.querySelectorAll('.dot').forEach((d, i) => {
+    d.classList.toggle('active', i === state.slide);
+    d.classList.toggle('done', slideRead[i] && i !== state.slide);
+    d.classList.toggle('locked', i > mx);
+  });
+}
+
+btnPrevSlide.addEventListener('click', () => {
+  if (state.slide > 0) { state.slide--; renderSlide(); }
+});
+
+btnNextSlide.addEventListener('click', () => {
+  if (slideRead[state.slide] && state.slide < THEORY.length - 1) { state.slide++; renderSlide(); }
+});
+
+btnToTrainer.addEventListener('click', () => {
+  if (!slideRead[state.slide]) return;
+  state.taskIndex = 0;
+  state.taskResults = [];
+  showScreen('screen-trainer');
+  renderTask();
+});
+
+/* =========================================================
+   БАНК ЗАДАНИЙ ТРЕНАЖЁРА (30 ЗАДАНИЙ)
+   ========================================================= */
+
+const TYPE_LABELS = {
+  choice: 'Выбор одного варианта',
+  tf: 'Верно / Неверно',
+  match: 'Установление соответствий',
+  classify: 'Классификация',
+  path: 'Перетаскивание · сборка пути'
+};
+
+const TASKS = [
+  /* ---------- 1–5: ВЫБОР ОДНОГО ВАРИАНТА ---------- */
+  {
+    type: 'choice',
+    question: 'Что такое операционная система?',
+    options: [
+      'Программа для рисования картинок',
+      'Главная программа, которая управляет работой компьютера',
+      'Устройство для хранения файлов',
+      'Папка с документами'
+    ],
+    correct: 1,
+    explain: 'ОС — это системная программа, управляющая устройствами и другими программами.',
+    hint: 'Вспомни слайд 1: ОС — это главная (системная) программа, которая «оживляет» компьютер и управляет всем «железом».'
+  },
+  {
+    type: 'choice',
+    question: 'Какая из перечисленных программ является операционной системой?',
+    options: ['Microsoft Word (майкрософт ворд)', 'Windows (виндовс)', 'Paint (пэйнт)', 'Microsoft Excel (майкрософт эксель)'],
+    correct: 1,
+    explain: 'Windows (виндовс), Linux (линукс), macOS (макос), Android (андроид) — это операционные системы.',
+    hint: 'Операционные системы — это Windows (виндовс), Linux (линукс), macOS (макос), Android (андроид), iOS (ай-оу-эс). Остальные — прикладные программы.'
+  },
+  {
+    type: 'choice',
+    question: 'Что обозначает расширение .exe?',
+    options: ['Текстовый документ', 'Исполняемая программа', 'Рисунок', 'Звукозапись'],
+    correct: 1,
+    explain: 'Файлы с расширением .exe — это программы, которые можно запустить.',
+    hint: 'От английского «executable» (executable — исполняемый). Такие файлы можно запустить двойным щелчком.'
+  },
+  {
+    type: 'choice',
+    question: 'Из каких частей состоит имя файла?',
+    options: [
+      'Только из имени',
+      'Имя + точка + расширение',
+      'Диск + папка',
+      'Расширение + путь'
+    ],
+    correct: 1,
+    explain: 'Например: Урок.docx — «Урок» это имя, «docx» — расширение.',
+    hint: 'Слайд 3: полное имя файла = имя + точка + расширение. Например: Урок.docx'
+  },
+  {
+    type: 'choice',
+    question: 'Какая программа предназначена для работы с текстом?',
+    options: ['Microsoft Word (майкрософт ворд)', 'Paint (пэйнт)', 'Калькулятор', 'Windows Media Player (виндовс медиа плеер)'],
+    correct: 0,
+    explain: 'Microsoft Word (майкрософт ворд) — текстовый редактор, создаёт документы .docx.',
+    hint: 'Word (ворд) — от английского «word» (слово). Paint (пэйнт) — рисование, Калькулятор — вычисления, Media Player (медиа плеер) — музыка и видео.'
+  },
+
+  /* ---------- 6–10: ВЕРНО / НЕВЕРНО ---------- */
+  {
+    type: 'tf',
+    question: 'Папка может содержать внутри себя другие папки.',
+    answer: true,
+    explain: 'Именно так строится древовидная структура файловой системы.',
+    hint: 'Вспомни слайд 6: файловая система имеет древовидную структуру — папки вкладываются друг в друга.'
+  },
+  {
+    type: 'tf',
+    question: 'Расширение .mp3 обозначает видеофайл.',
+    answer: false,
+    explain: '.mp3 — это звукозапись. Видеофайлы имеют расширения .mp4, .avi, .mov.',
+    hint: 'Слайд 4: .mp3 — это звукозапись (музыка). Видео — это .mp4, .avi, .mov.'
+  },
+  {
+    type: 'tf',
+    question: 'В имени файла можно использовать символ «*».',
+    answer: false,
+    explain: 'Символы \\ / : * ? " < > | запрещены в именах файлов.',
+    hint: 'Слайд 7: запрещено 9 символов: \\ / : * ? " < > |'
+  },
+  {
+    type: 'tf',
+    question: 'Операционная система управляет работой всех устройств компьютера.',
+    answer: true,
+    explain: 'Это одна из главных функций ОС.',
+    hint: 'Слайд 2: одна из главных функций ОС — управление устройствами (процессором, памятью, дисками, мышью, клавиатурой).'
+  },
+  {
+    type: 'tf',
+    question: 'Удалённый файл сначала попадает в Корзину.',
+    answer: true,
+    explain: 'Из Корзины файл можно восстановить, пока её не очистили.',
+    hint: 'Слайд 9: при удалении файл попадает в Корзину, откуда его можно восстановить.'
+  },
+
+  /* ---------- 11–15: СООТВЕТСТВИЯ ---------- */
+  {
+    type: 'match',
+    question: 'Соотнеси расширение файла и его тип.',
+    pairs: [
+      { left: '.docx', right: 'Документ Word (ворд)' },
+      { left: '.jpg', right: 'Рисунок' },
+      { left: '.mp3', right: 'Звукозапись' },
+      { left: '.mp4', right: 'Видеофильм' },
+      { left: '.exe', right: 'Программа' }
+    ],
+    explain: 'Расширение всегда подсказывает, какой это тип файла.',
+    hint: 'Слайд 4: .docx — Word (ворд), .jpg — рисунок, .mp3 — звук, .mp4 — видео, .exe — программа.'
+  },
+  {
+    type: 'match',
+    question: 'Соотнеси программу и её назначение.',
+    pairs: [
+      { left: '📝 Microsoft Word (майкрософт ворд)', right: 'Работа с текстом' },
+      { left: '📊 Microsoft Excel (майкрософт эксель)', right: 'Работа с таблицами' },
+      { left: '📽️ Microsoft PowerPoint (майкрософт пауэр-пойнт)', right: 'Создание презентаций' },
+      { left: '🎨 Paint (пэйнт)', right: 'Рисование' },
+      { left: '📁 Проводник (проводник)', right: 'Работа с файлами и папками' }
+    ],
+    explain: 'Каждая прикладная программа решает свою задачу.',
+    hint: 'Word (ворд) — текст, Excel (эксель) — таблицы, PowerPoint (пауэр-пойнт) — презентации, Paint (пэйнт) — рисование, Проводник — файлы и папки.'
+  },
+  {
+    type: 'match',
+    question: 'Соотнеси элемент файловой системы и его пример.',
+    pairs: [
+      { left: '💽 Диск', right: 'C:' },
+      { left: '📁 Папка', right: 'Школа' },
+      { left: '📄 Файл', right: 'Урок.docx' },
+      { left: '🔤 Расширение', right: '.txt' },
+      { left: '🧭 Путь', right: 'C:\\Школа\\Урок.docx' }
+    ],
+    explain: 'Путь — это полный «адрес» файла на компьютере.',
+    hint: 'Диск — C: или D:, папка — контейнер (Школа), файл — с расширением (Урок.docx), путь — полный адрес.'
+  },
+  {
+    type: 'match',
+    question: 'Соотнеси действие с файлом и его результат.',
+    pairs: [
+      { left: '📋 Копировать', right: 'Появляется вторая копия файла' },
+      { left: '✂️ Переместить', right: 'Файл исчезает из старой папки' },
+      { left: '🗑️ Удалить', right: 'Файл попадает в Корзину' },
+      { left: '✏️ Переименовать', right: 'Меняется имя файла' },
+      { left: '➕ Создать', right: 'Появляется новый объект' }
+    ],
+    explain: 'При копировании объектов становится два, при перемещении — по-прежнему один.',
+    hint: 'Слайд 9: копирование → две копии; перемещение → один объект; удаление → в Корзину; переименование → меняется имя.'
+  },
+  {
+    type: 'match',
+    question: 'Соотнеси расширение и программу, которая обычно его открывает.',
+    pairs: [
+      { left: '📄 .docx', right: 'Word (ворд)' },
+      { left: '📊 .xlsx', right: 'Excel (эксель)' },
+      { left: '📽️ .pptx', right: 'PowerPoint (пауэр-пойнт)' },
+      { left: '🖼️ .png', right: 'Paint (пэйнт)' },
+      { left: '🐍 .py', right: 'Python (пайтон)' }
+    ],
+    explain: 'Операционная система подбирает программу по расширению файла.',
+    hint: '.docx → Word (ворд), .xlsx → Excel (эксель), .pptx → PowerPoint (пауэр-пойнт), .png → Paint (пэйнт), .py → Python (пайтон).'
+  },
+
+  /* ---------- 16–20: КЛАССИФИКАЦИЯ ---------- */
+  {
+    type: 'classify',
+    question: 'Распредели объекты по группам: файл, папка или диск.',
+    cats: ['Файл', 'Папка', 'Диск'],
+    items: [
+      { text: 'Урок.docx', cat: 'Файл' },
+      { text: 'Музыка', cat: 'Папка' },
+      { text: 'D:', cat: 'Диск' },
+      { text: 'Фото.jpg', cat: 'Файл' },
+      { text: 'Документы', cat: 'Папка' },
+      { text: 'C:', cat: 'Диск' }
+    ],
+    explain: 'Файл содержит информацию, папка — контейнер, диск — устройство хранения.',
+    hint: 'Файл — есть расширение (.docx, .jpg). Папка — просто имя. Диск — буква с двоеточием (C:, D:).'
+  },
+  {
+    type: 'classify',
+    question: 'Распредели расширения по типам файлов.',
+    cats: ['Текстовые', 'Графические', 'Исполняемые'],
+    items: [
+      { text: '.docx', cat: 'Текстовые' },
+      { text: '.txt', cat: 'Текстовые' },
+      { text: '.jpg', cat: 'Графические' },
+      { text: '.png', cat: 'Графические' },
+      { text: '.exe', cat: 'Исполняемые' },
+      { text: '.bat', cat: 'Исполняемые' }
+    ],
+    explain: 'Текстовые — .docx, .txt; графические — .jpg, .png; исполняемые — .exe, .bat.',
+    hint: 'Текстовые: .docx, .txt. Графические: .jpg, .png. Исполняемые: .exe, .bat (а также .py).'
+  },
+  {
+    type: 'classify',
+    question: 'Раздели программы на операционные системы и прикладные программы.',
+    cats: ['Операционные системы', 'Прикладные программы'],
+    items: [
+      { text: 'Windows (виндовс)', cat: 'Операционные системы' },
+      { text: 'Linux (линукс)', cat: 'Операционные системы' },
+      { text: 'Android (андроид)', cat: 'Операционные системы' },
+      { text: 'Microsoft Word (майкрософт ворд)', cat: 'Прикладные программы' },
+      { text: 'Microsoft Excel (майкрософт эксель)', cat: 'Прикладные программы' },
+      { text: 'Paint (пэйнт)', cat: 'Прикладные программы' }
+    ],
+    explain: 'ОС управляет компьютером, прикладные программы решают задачи пользователя.',
+    hint: 'Windows (виндовс), Linux (линукс), Android (андроид) — ОС. Word (ворд), Excel (эксель), Paint (пэйнт) — прикладные программы.'
+  },
+  {
+    type: 'classify',
+    question: 'Раздели символы: какие можно использовать в имени файла, а какие нельзя.',
+    cats: ['Можно в имени файла', 'Нельзя в имени файла'],
+    items: [
+      { text: 'Буква «А»', cat: 'Можно в имени файла' },
+      { text: 'Цифра «7»', cat: 'Можно в имени файла' },
+      { text: 'Знак «_»', cat: 'Можно в имени файла' },
+      { text: 'Знак «?»', cat: 'Нельзя в имени файла' },
+      { text: 'Знак «*»', cat: 'Нельзя в имени файла' },
+      { text: 'Знак «/»', cat: 'Нельзя в имени файла' }
+    ],
+    explain: 'Запрещены символы \\ / : * ? " < > |',
+    hint: 'Слайд 7: запрещены символы \\ / : * ? " < > | Всё остальное можно.'
+  },
+  {
+    type: 'classify',
+    question: 'Раздели расширения на звуковые файлы и видеофайлы.',
+    cats: ['Звуковые файлы', 'Видеофайлы'],
+    items: [
+      { text: '.mp3', cat: 'Звуковые файлы' },
+      { text: '.wav', cat: 'Звуковые файлы' },
+      { text: '.mid', cat: 'Звуковые файлы' },
+      { text: '.mp4', cat: 'Видеофайлы' },
+      { text: '.avi', cat: 'Видеофайлы' },
+      { text: '.mov', cat: 'Видеофайлы' }
+    ],
+    explain: 'Звук: .mp3, .wav, .mid. Видео: .mp4, .avi, .mov.',
+    hint: 'Звук: .mp3, .wav, .mid. Видео: .mp4, .avi, .mov.'
+  },
+
+  /* ---------- 21–25: ЗАДАНИЯ БЕЗ ВВОДА С КЛАВИАТУРЫ ---------- */
+  {
+    type: 'choice',
+    question: 'Какое расширение соответствует документу Microsoft Word (майкрософт ворд)?',
+    options: ['.txt', '.docx', '.jpg', '.mp3'],
+    correct: 1,
+    explain: 'Документы Word (ворд) имеют расширение .docx (или .doc).',
+    hint: 'Слайд 4: документ Word (ворд) — это .docx.'
+  },
+  {
+    type: 'tf',
+    question: 'Расширение .png обозначает графический файл.',
+    answer: true,
+    explain: '.png — это графический формат, как и .jpg.',
+    hint: 'Слайд 4: .png — это графический формат (рисунок с прозрачностью).'
+  },
+  {
+    type: 'match',
+    question: 'Соотнеси расширение и тип файла.',
+    pairs: [
+      { left: '📄 .docx', right: 'Документ Word (ворд)' },
+      { left: '🖼️ .jpg', right: 'Рисунок' },
+      { left: '🎵 .mp3', right: 'Звукозапись' },
+      { left: '🚀 .exe', right: 'Программа' }
+    ],
+    explain: 'Расширение подсказывает, какой это тип файла.',
+    hint: '.docx — документ Word (ворд), .jpg — рисунок, .mp3 — звук, .exe — программа.'
+  },
+  {
+    type: 'classify',
+    question: 'Распредели расширения по группам: текстовые, графические, исполняемые.',
+    cats: ['Текстовые', 'Графические', 'Исполняемые'],
+    items: [
+      { text: '.docx', cat: 'Текстовые' },
+      { text: '.txt', cat: 'Текстовые' },
+      { text: '.jpg', cat: 'Графические' },
+      { text: '.png', cat: 'Графические' },
+      { text: '.exe', cat: 'Исполняемые' },
+      { text: '.py', cat: 'Исполняемые' }
+    ],
+    explain: 'Текстовые: .docx, .txt. Графические: .jpg, .png. Исполняемые: .exe, .py.',
+    hint: 'Текстовые: .docx, .txt. Графические: .jpg, .png. Исполняемые: .exe, .py.'
+  },
+  {
+    type: 'path',
+    question: 'Собери путь к файлу «Отчёт.docx», который лежит в папке «Документы» на диске C:.',
+    answer: ['C:', 'Документы', 'Отчёт.docx'],
+    explain: 'Путь: C:\\Документы\\Отчёт.docx',
+    hint: 'Порядок сборки пути: сначала диск (C:), потом папка (Документы), потом имя файла с расширением.'
+  },
+
+  /* ---------- 26–30: ПЕРЕТАСКИВАНИЕ / СБОРКА ПУТИ ---------- */
+  {
+    type: 'path',
+    question: 'Собери правильный путь к файлу «Урок.docx». Перетащи элементы в нужном порядке.',
+    answer: ['C:', 'Школа', 'Информатика', 'Урок.docx'],
+    explain: 'Путь: C:\\Школа\\Информатика\\Урок.docx',
+    hint: 'Слайд 8: сначала диск, потом папки по порядку вложенности, в конце — имя файла.'
+  },
+  {
+    type: 'path',
+    question: 'Собери путь к файлу «Музыка.mp3», который лежит в папке «Моя музыка» на диске D:.',
+    answer: ['D:', 'Моя музыка', 'Музыка.mp3'],
+    explain: 'Путь: D:\\Моя музыка\\Музыка.mp3',
+    hint: 'Диск — D:, потом папка «Моя музыка», в конце — файл «Музыка.mp3».'
+  },
+  {
+    type: 'path',
+    question: 'Собери путь к файлу «Годовой.docx» из папки «Отчёты» в папке «Документы» на диске C:.',
+    answer: ['C:', 'Документы', 'Отчёты', 'Годовой.docx'],
+    explain: 'Путь: C:\\Документы\\Отчёты\\Годовой.docx',
+    hint: 'Порядок: диск C: → папка «Документы» → подпапка «Отчёты» → файл «Годовой.docx».'
+  },
+  {
+    type: 'path',
+    question: 'Собери путь к фотографии «Море.jpg» из папки «Лето» в папке «Фото» на диске D:.',
+    answer: ['D:', 'Фото', 'Лето', 'Море.jpg'],
+    explain: 'Путь: D:\\Фото\\Лето\\Море.jpg',
+    hint: 'Порядок: диск D: → папка «Фото» → подпапка «Лето» → файл «Море.jpg».'
+  },
+  {
+    type: 'path',
+    question: 'Собери путь к файлу «Задача.py» на Рабочем столе ученика (диск C:).',
+    answer: ['C:', 'Пользователи', 'Ученик', 'Рабочий стол', 'Задача.py'],
+    explain: 'Путь: C:\\Пользователи\\Ученик\\Рабочий стол\\Задача.py',
+    hint: 'Путь к рабочему столу в Windows (виндовс): C:\\Пользователи\\Ученик\\Рабочий стол\\...'
+  }
+];
+
+/* =========================================================
+   ПОСТРОИТЕЛИ ЗАДАНИЙ
+   ========================================================= */
+
+const MATCH_COLORS = ['#3b82f6', '#8b5cf6', '#f59e0b', '#10b981', '#ef4444', '#06b6d4', '#ec4899'];
+
+/* --- Механика 1: выбор одного варианта --- */
+function buildChoice(item, body) {
+  let selected = null;
+  const opts = document.createElement('div');
+  opts.className = 'options';
+
+  item.options.forEach((text, i) => {
+    const b = document.createElement('button');
+    b.className = 'option';
+    const l = document.createElement('span');
+    l.className = 'option-letter';
+    l.textContent = ['А', 'Б', 'В', 'Г', 'Д'][i] || String(i + 1);
+    const t = document.createElement('span');
+    t.textContent = text;
+    b.append(l, t);
+    b.addEventListener('click', () => {
+      if (opts.dataset.locked) return;
+      opts.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+      b.classList.add('selected');
+      selected = i;
+    });
+    opts.appendChild(b);
+  });
+
+  body.appendChild(opts);
+
+  return function () {
+    if (selected === null) return { ready: false, msg: 'Сначала выберите один вариант ответа.' };
+    opts.dataset.locked = '1';
+    const correct = selected === item.correct;
+    opts.querySelectorAll('.option').forEach((o, i) => {
+      if (i === item.correct) o.classList.add('correct');
+      else if (i === selected) o.classList.add('wrong');
+    });
+    const text = correct
+      ? 'Верно! ' + (item.explain || '')
+      : 'Неверно. Правильный ответ: «' + item.options[item.correct] + '». ' + (item.explain || '');
+    return { ready: true, correct: correct, msg: text };
+  };
+}
+
+/* --- Механика 2: верно / неверно --- */
+function buildTF(item, body) {
+  let selected = null;
+  const row = document.createElement('div');
+  row.className = 'tf-row';
+  const btns = [];
+
+  [{ label: '✅ Верно', val: true, cls: 'tf-true' },
+   { label: '❌ Неверно', val: false, cls: 'tf-false' }].forEach(cfg => {
+    const b = document.createElement('button');
+    b.className = 'tf-btn ' + cfg.cls;
+    b.textContent = cfg.label;
+    b.addEventListener('click', () => {
+      if (row.dataset.locked) return;
+      btns.forEach(x => x.classList.remove('selected'));
+      b.classList.add('selected');
+      selected = cfg.val;
+    });
+    btns.push(b);
+    row.appendChild(b);
+  });
+
+  body.appendChild(row);
+
+  return function () {
+    if (selected === null) return { ready: false, msg: 'Выберите «Верно» или «Неверно».' };
+    row.dataset.locked = '1';
+    const correct = selected === item.answer;
+    btns.forEach(b => {
+      const isTrue = b.classList.contains('tf-true');
+      if (isTrue === item.answer) b.classList.add('correct');
+      else if (isTrue === selected) b.classList.add('wrong');
+    });
+    const text = correct
+      ? 'Верно! ' + (item.explain || '')
+      : 'Неверно. Правильный ответ: «' + (item.answer ? 'Верно' : 'Неверно') + '». ' + (item.explain || '');
+    return { ready: true, correct: correct, msg: text };
+  };
+}
+
+/* --- Механика 3: установление соответствий --- */
+function buildMatch(item, body) {
+  const pairs = item.pairs;
+  const wrap = document.createElement('div');
+  wrap.className = 'match-wrap';
+
+  const leftCol = document.createElement('div');
+  leftCol.className = 'match-col';
+  const rightCol = document.createElement('div');
+  rightCol.className = 'match-col';
+
+  const leftEls = [];
+  const rightEls = [];
+  const matches = {};
+  let selectedLeft = null;
+
+  pairs.forEach((p, i) => {
+    const el = document.createElement('button');
+    el.className = 'match-item';
+    el.dataset.id = String(i);
+    const dot = document.createElement('span');
+    dot.className = 'match-dot';
+    const txt = document.createElement('span');
+    txt.textContent = p.left;
+    el.append(dot, txt);
+    el.addEventListener('click', () => {
+      if (wrap.dataset.locked) return;
+      selectedLeft = i;
+      leftEls.forEach(e => e.classList.toggle('selected', Number(e.dataset.id) === i));
+    });
+    leftEls.push(el);
+    leftCol.appendChild(el);
+  });
+
+  const rightOrder = shuffle(pairs.map((p, i) => i));
+  rightOrder.forEach(i => {
+    const el = document.createElement('button');
+    el.className = 'match-item';
+    el.dataset.id = String(i);
+    const dot = document.createElement('span');
+    dot.className = 'match-dot';
+    const txt = document.createElement('span');
+    txt.textContent = pairs[i].right;
+    el.append(dot, txt);
+    el.addEventListener('click', () => {
+      if (wrap.dataset.locked) return;
+      if (selectedLeft === null) return;
+      for (const k in matches) {
+        if (matches[k] === i && Number(k) !== selectedLeft) delete matches[k];
+      }
+      matches[selectedLeft] = i;
+      selectedLeft = null;
+      leftEls.forEach(e => e.classList.remove('selected'));
+      paint();
+    });
+    rightEls.push(el);
+    rightCol.appendChild(el);
+  });
+
+  function paint() {
+    leftEls.forEach(el => {
+      const id = Number(el.dataset.id);
+      const dot = el.querySelector('.match-dot');
+      if (matches[id] !== undefined) dot.style.background = MATCH_COLORS[id % MATCH_COLORS.length];
+      else dot.style.background = '#dbe6f5';
+    });
+    rightEls.forEach(el => {
+      const id = Number(el.dataset.id);
+      const dot = el.querySelector('.match-dot');
+      let found = -1;
+      for (const k in matches) {
+        if (matches[k] === id) { found = Number(k); break; }
+      }
+      if (found >= 0) dot.style.background = MATCH_COLORS[found % MATCH_COLORS.length];
+      else dot.style.background = '#dbe6f5';
+    });
+  }
+
+  wrap.append(leftCol, rightCol);
+  body.appendChild(wrap);
+
+  return function () {
+    const keys = Object.keys(matches);
+    if (keys.length < pairs.length) {
+      return { ready: false, msg: 'Соотнесите все элементы: нажмите на элемент слева, затем на подходящий элемент справа.' };
+    }
+    wrap.dataset.locked = '1';
+    let okCount = 0;
+    leftEls.forEach(el => {
+      const id = Number(el.dataset.id);
+      if (matches[id] === id) { el.classList.add('matched-ok'); okCount++; }
+      else el.classList.add('matched-bad');
+    });
+    rightEls.forEach(el => {
+      const id = Number(el.dataset.id);
+      let found = -1;
+      for (const k in matches) {
+        if (matches[k] === id) { found = Number(k); break; }
+      }
+      if (found === id) el.classList.add('matched-ok');
+      else el.classList.add('matched-bad');
+    });
+
+    const correct = okCount === pairs.length;
+    let msg;
+    if (correct) {
+      msg = 'Отлично! Все соответствия верны. ' + (item.explain || '');
+    } else {
+      const right = pairs.map(p => p.left + ' → ' + p.right).join('; ');
+      msg = 'Верных пар: ' + okCount + ' из ' + pairs.length + '. Правильно: ' + right + '. ' + (item.explain || '');
+    }
+    return { ready: true, correct: correct, msg: msg };
+  };
+}
+
+/* --- Механика 4: классификация --- */
+function buildClassify(item, body) {
+  let dragEl = null;
+  let selectedItem = null;
+
+  const poolTitle = document.createElement('div');
+  poolTitle.className = 'pool-title';
+  poolTitle.textContent = 'Перетащи элементы в нужную группу (или нажми на элемент, а потом на группу):';
+
+  const pool = document.createElement('div');
+  pool.className = 'pool';
+
+  const catsWrap = document.createElement('div');
+  catsWrap.className = 'cats';
+
+  const catContainers = {};
+
+  function attachPoolDrop(el) {
+    el.addEventListener('dragover', e => {
+      if (body.dataset.locked) return;
+      e.preventDefault();
+      el.classList.add('over');
+    });
+    el.addEventListener('dragleave', () => el.classList.remove('over'));
+    el.addEventListener('drop', e => {
+      e.preventDefault();
+      el.classList.remove('over');
+      if (body.dataset.locked) return;
+      if (dragEl && dragEl.classList.contains('chip-item')) {
+        el.appendChild(dragEl);
+        selectedItem = null;
+        document.querySelectorAll('.chip-item.selected').forEach(c => c.classList.remove('selected'));
+      }
+    });
+  }
+
+  item.cats.forEach(cat => {
+    const box = document.createElement('div');
+    box.className = 'cat-box';
+
+    const title = document.createElement('div');
+    title.className = 'cat-title';
+    title.textContent = cat;
+
+    const inner = document.createElement('div');
+    inner.className = 'cat-items';
+    inner.dataset.cat = cat;
+
+    attachPoolDrop(inner);
+
+    box.addEventListener('click', () => {
+      if (body.dataset.locked) return;
+      if (selectedItem) {
+        inner.appendChild(selectedItem);
+        selectedItem.classList.remove('selected');
+        selectedItem = null;
+      }
+    });
+
+    box.append(title, inner);
+    catsWrap.appendChild(box);
+    catContainers[cat] = inner;
+  });
+
+  const allItems = shuffle(item.items.slice());
+  allItems.forEach(it => {
+    const chip = document.createElement('div');
+    chip.className = 'chip-item';
+    chip.textContent = it.text;
+    chip.dataset.cat = it.cat;
+    chip.draggable = true;
+
+    chip.addEventListener('dragstart', e => {
+      if (body.dataset.locked) { e.preventDefault(); return; }
+      dragEl = chip;
+      chip.classList.add('dragging');
+      try { e.dataTransfer.setData('text/plain', it.text); } catch (err) {}
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    chip.addEventListener('dragend', () => {
+      chip.classList.remove('dragging');
+      dragEl = null;
+    });
+    chip.addEventListener('click', e => {
+      e.stopPropagation();
+      if (body.dataset.locked) return;
+      if (selectedItem === chip) {
+        chip.classList.remove('selected');
+        selectedItem = null;
+        return;
+      }
+      document.querySelectorAll('.chip-item.selected').forEach(c => c.classList.remove('selected'));
+      chip.classList.add('selected');
+      selectedItem = chip;
+    });
+
+    pool.appendChild(chip);
+  });
+
+  attachPoolDrop(pool);
+
+  body.append(poolTitle, pool, catsWrap);
+
+  return function () {
+    const total = item.items.length;
+    let placed = 0;
+    let okCount = 0;
+    const wrongInfo = [];
+
+    item.cats.forEach(cat => {
+      const container = catContainers[cat];
+      container.querySelectorAll('.chip-item').forEach(chip => {
+        placed++;
+        if (chip.dataset.cat === cat) {
+          okCount++;
+          chip.style.borderColor = '#10b981';
+          chip.style.background = '#ecfdf5';
+        } else {
+          chip.style.borderColor = '#ef4444';
+          chip.style.background = '#fef2f2';
+          wrongInfo.push(chip.textContent + ' → ' + chip.dataset.cat);
+        }
+      });
+    });
+
+    if (placed < total) {
+      return { ready: false, msg: 'Распределите все элементы по группам (осталось: ' + (total - placed) + ').' };
+    }
+
+    body.dataset.locked = '1';
+
+    pool.querySelectorAll('.chip-item').forEach(chip => {
+      chip.style.borderColor = '#ef4444';
+      chip.style.background = '#fef2f2';
+    });
+
+    const correct = okCount === total;
+    let msg;
+    if (correct) {
+      msg = 'Превосходно! Все элементы в своих группах. ' + (item.explain || '');
+    } else {
+      msg = 'Верно распределено: ' + okCount + ' из ' + total + '. Ошибки: ' + wrongInfo.join('; ') + '. ' + (item.explain || '');
+    }
+    return { ready: true, correct: correct, msg: msg };
+  };
+}
+
+/* --- Механика 5: перетаскивание, сборка пути --- */
+function buildPath(item, body) {
+  let dragEl = null;
+
+  const poolTitle = document.createElement('div');
+  poolTitle.className = 'pool-title';
+  poolTitle.textContent = 'Перетащи элементы в ячейки по порядку (или нажми на элемент, чтобы он встал в первую свободную ячейку):';
+
+  const slotsRow = document.createElement('div');
+  slotsRow.className = 'slots-row';
+
+  const pool = document.createElement('div');
+  pool.className = 'pool';
+
+  const slots = [];
+
+  function refreshSlots() {
+    slots.forEach(s => {
+      if (s.firstChild) s.classList.add('filled');
+      else s.classList.remove('filled');
+    });
+  }
+
+  item.answer.forEach((_, i) => {
+    if (i > 0) {
+      const sep = document.createElement('span');
+      sep.className = 'path-sep';
+      sep.textContent = '\\';
+      slotsRow.appendChild(sep);
+    }
+    const slot = document.createElement('div');
+    slot.className = 'slot';
+    slot.dataset.idx = String(i);
+
+    slot.addEventListener('dragover', e => {
+      if (body.dataset.locked) return;
+      e.preventDefault();
+      slot.classList.add('over');
+    });
+    slot.addEventListener('dragleave', () => slot.classList.remove('over'));
+    slot.addEventListener('drop', e => {
+      e.preventDefault();
+      slot.classList.remove('over');
+      if (body.dataset.locked) return;
+      if (dragEl && dragEl.classList.contains('chip-item')) {
+        if (slot.firstChild && slot.firstChild !== dragEl) {
+          pool.appendChild(slot.firstChild);
+        }
+        slot.appendChild(dragEl);
+        refreshSlots();
+      }
+    });
+    slot.addEventListener('click', () => {
+      if (body.dataset.locked) return;
+      if (slot.firstChild) {
+        pool.appendChild(slot.firstChild);
+        refreshSlots();
+      }
+    });
+
+    slots.push(slot);
+    slotsRow.appendChild(slot);
+  });
+
+  pool.addEventListener('dragover', e => {
+    if (body.dataset.locked) return;
+    e.preventDefault();
+    pool.classList.add('over');
+  });
+  pool.addEventListener('dragleave', () => pool.classList.remove('over'));
+  pool.addEventListener('drop', e => {
+    e.preventDefault();
+    pool.classList.remove('over');
+    if (body.dataset.locked) return;
+    if (dragEl && dragEl.classList.contains('chip-item')) {
+      pool.appendChild(dragEl);
+      refreshSlots();
+    }
+  });
+
+  const shuffled = shuffle(item.answer.slice());
+  shuffled.forEach(text => {
+    const chip = document.createElement('div');
+    chip.className = 'chip-item';
+    chip.textContent = text;
+    chip.dataset.text = text;
+    chip.draggable = true;
+
+    chip.addEventListener('dragstart', e => {
+      if (body.dataset.locked) { e.preventDefault(); return; }
+      dragEl = chip;
+      chip.classList.add('dragging');
+      try { e.dataTransfer.setData('text/plain', text); } catch (err) {}
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    chip.addEventListener('dragend', () => {
+      chip.classList.remove('dragging');
+      dragEl = null;
+    });
+    chip.addEventListener('click', e => {
+      e.stopPropagation();
+      if (body.dataset.locked) return;
+      if (chip.parentElement.classList.contains('slot')) {
+        pool.appendChild(chip);
+        refreshSlots();
+        return;
+      }
+      for (let i = 0; i < slots.length; i++) {
+        if (!slots[i].firstChild) {
+          slots[i].appendChild(chip);
+          refreshSlots();
+          return;
+        }
+      }
+    });
+
+    pool.appendChild(chip);
+  });
+
+  body.append(poolTitle, slotsRow, pool);
+  refreshSlots();
+
+  return function () {
+    for (let i = 0; i < slots.length; i++) {
+      if (!slots[i].firstChild) {
+        return { ready: false, msg: 'Заполните все ячейки пути (осталось: ' + slots.filter(s => !s.firstChild).length + ').' };
+      }
+    }
+    body.dataset.locked = '1';
+
+    let okCount = 0;
+    slots.forEach((s, i) => {
+      const val = s.firstChild.dataset.text;
+      if (val === item.answer[i]) {
+        okCount++;
+        s.style.borderColor = '#10b981';
+        s.style.background = '#ecfdf5';
+      } else {
+        s.style.borderColor = '#ef4444';
+        s.style.background = '#fef2f2';
+      }
+    });
+
+    const correct = okCount === slots.length;
+    const rightPath = item.answer.join('\\');
+    const msg = correct
+      ? 'Отлично! Путь собран верно: ' + rightPath + '. ' + (item.explain || '')
+      : 'Верных позиций: ' + okCount + ' из ' + slots.length + '. Правильный путь: ' + rightPath + '. ' + (item.explain || '');
+    return { ready: true, correct: correct, msg: msg };
+  };
+}
+
+/* =========================================================
+   УНИВЕРСАЛЬНЫЙ РЕНДЕР ВОПРОСА
+   ========================================================= */
+
+function buildQuestionBody(item) {
+  const body = document.createElement('div');
+  body.className = 'task-body';
+  let check = null;
+
+  switch (item.type) {
+    case 'choice': check = buildChoice(item, body); break;
+    case 'tf': check = buildTF(item, body); break;
+    case 'match': check = buildMatch(item, body); break;
+    case 'classify': check = buildClassify(item, body); break;
+    case 'path': check = buildPath(item, body); break;
+    default: check = function () { return { ready: false, msg: 'Неизвестный тип задания.' }; };
+  }
+
+  return { body: body, check: check };
+}
+
+/* =========================================================
+   УНИВЕРСАЛЬНЫЙ БЛОК ПОДСКАЗКИ
+   ========================================================= */
+
+function createHintBlock(hintText) {
+  const wrap = document.createElement('div');
+
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'hint-btn';
+  btn.title = 'Показать подсказку';
+  const bulb = document.createElement('span');
+  bulb.className = 'hint-bulb';
+  bulb.textContent = '💡';
+  const lbl = document.createElement('span');
+  lbl.textContent = 'Подсказка';
+  btn.append(bulb, lbl);
+
+  const box = document.createElement('div');
+  box.className = 'hint-box hidden';
+  const label = document.createElement('span');
+  label.className = 'hint-label';
+  label.textContent = '💡 Подсказка';
+  const txt = document.createElement('span');
+  txt.textContent = hintText || 'Внимательно прочитай условие задания и вспомни материал слайдов.';
+  box.append(label, txt);
+
+  btn.addEventListener('click', () => {
+    const hidden = box.classList.toggle('hidden');
+    btn.classList.toggle('active', !hidden);
+    btn.title = hidden ? 'Показать подсказку' : 'Скрыть подсказку';
+  });
+
+  wrap.append(btn);
+  return { button: btn, box: box };
+}
+
+/* =========================================================
+   ЭТАП 2 — ТРЕНАЖЁР
+   ========================================================= */
+
+const taskCard = document.getElementById('taskCard');
+const trainerProgress = document.getElementById('trainerProgress');
+const trainerScore = document.getElementById('trainerScore');
+const trainerBar = document.getElementById('trainerBar');
+
+function updateTrainerHeader() {
+  const done = state.taskResults.filter(r => r === true).length;
+  trainerProgress.textContent = 'Задание ' + (state.taskIndex + 1) + ' из ' + TASKS.length;
+  trainerScore.textContent = 'Верно: ' + done;
+  trainerBar.style.width = (state.taskIndex / TASKS.length * 100) + '%';
+}
+
+function renderTask() {
+  const task = TASKS[state.taskIndex];
+  updateTrainerHeader();
+
+  taskCard.innerHTML = '';
+
+  const head = document.createElement('div');
+  head.className = 'task-head';
+
+  const typeBadge = document.createElement('span');
+  typeBadge.className = 'task-type';
+  typeBadge.textContent = TYPE_LABELS[task.type] || 'Задание';
+
+  const rightSide = document.createElement('div');
+  rightSide.className = 'task-head-right';
+  const numBadge = document.createElement('span');
+  numBadge.className = 'task-num';
+  numBadge.textContent = 'Задание ' + (state.taskIndex + 1) + ' / ' + TASKS.length;
+
+  const hint = createHintBlock(task.hint);
+  rightSide.append(numBadge, hint.button);
+  head.append(typeBadge, rightSide);
+
+  const q = document.createElement('h3');
+  q.className = 'task-question';
+  q.textContent = task.question;
+
+  const built = buildQuestionBody(task);
+
+  const feedback = document.createElement('div');
+  feedback.className = 'feedback hidden';
+
+  const footer = document.createElement('div');
+  footer.className = 'task-footer';
+
+  const btnCheck = document.createElement('button');
+  btnCheck.className = 'btn btn-primary';
+  btnCheck.textContent = 'Проверить';
+
+  const btnNext = document.createElement('button');
+  btnNext.className = 'btn btn-green hidden';
+  btnNext.textContent = (state.taskIndex === TASKS.length - 1) ? 'Завершить тренажёр →' : 'Далее →';
+
+  footer.append(btnCheck, btnNext);
+
+  taskCard.append(head, hint.box, q, built.body, feedback, footer);
+
+  btnCheck.addEventListener('click', () => {
+    const res = built.check();
+    if (!res.ready) {
+      feedback.className = 'feedback warn';
+      feedback.textContent = res.msg;
+      return;
+    }
+
+    state.taskResults[state.taskIndex] = res.correct;
+
+    feedback.className = 'feedback ' + (res.correct ? 'ok' : 'bad');
+    feedback.textContent = (res.correct ? '✅ ' : '❌ ') + res.msg;
+
+    if (res.correct) soundOk(); else soundBad();
+
+    btnCheck.disabled = true;
+    btnNext.classList.remove('hidden');
+    updateTrainerHeader();
+  });
+
+  btnNext.addEventListener('click', () => {
+    if (state.taskIndex === TASKS.length - 1) {
+      startTest();
+      return;
+    }
+    state.taskIndex++;
+    renderTask();
+  });
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* =========================================================
+   ЭТАП 3 — ИТОГОВЫЙ ТЕСТ (20 ВОПРОСОВ)
+   ========================================================= */
+
+const TEST_QUESTIONS = [
+  /* ================= БЛОК А (15 вопросов) ================= */
+  {
+    block: 'A', type: 'choice',
+    question: 'Операционная система — это…',
+    options: [
+      'прикладная программа для рисования',
+      'комплекс программ, управляющих работой компьютера',
+      'устройство ввода информации',
+      'папка с системными файлами'
+    ],
+    correct: 1,
+    hint: 'Слайд 1: ОС — главная (системная) программа, управляющая работой всех устройств компьютера.'
+  },
+  {
+    block: 'A', type: 'tf',
+    question: 'Файл — это поименованная область на диске, в которой хранится информация.',
+    answer: true,
+    hint: 'Слайд 3: файл — это поименованная область на диске, где хранится информация.'
+  },
+  {
+    block: 'A', type: 'choice',
+    question: 'Какое расширение имеет графический файл?',
+    options: ['.mp3', '.docx', '.jpg', '.exe'],
+    correct: 2,
+    hint: 'Слайд 4: графические файлы — .jpg, .png, .bmp, .gif.'
+  },
+  {
+    block: 'A', type: 'choice',
+    question: 'Что такое папка?',
+    options: [
+      'Контейнер для хранения файлов и других папок',
+      'Программа для работы с текстом',
+      'Устройство хранения данных',
+      'Часть операционной системы'
+    ],
+    correct: 0,
+    hint: 'Слайд 5: папка (каталог) — это контейнер для файлов и других папок.'
+  },
+  {
+    block: 'A', type: 'tf',
+    question: 'Расширение .mp4 обозначает видеофайл.',
+    answer: true,
+    hint: 'Слайд 4: .mp4 — это видеофильм.'
+  },
+  {
+    block: 'A', type: 'choice',
+    question: 'Какой символ ЗАПРЕЩЕНО использовать в имени файла?',
+    options: ['Цифру 5', 'Букву Ж', 'Знак вопроса ?', 'Знак подчёркивания _'],
+    correct: 2,
+    hint: 'Слайд 7: запрещены символы \\ / : * ? " < > |'
+  },
+  {
+    block: 'A', type: 'match',
+    question: 'Соотнеси расширение и тип файла.',
+    pairs: [
+      { left: '📄 .docx', right: 'Документ Word (ворд)' },
+      { left: '🖼️ .png', right: 'Рисунок' },
+      { left: '🎬 .mp4', right: 'Видеофильм' },
+      { left: '🚀 .exe', right: 'Программа' }
+    ],
+    hint: 'Слайд 4: .docx — документ Word (ворд), .png — рисунок, .mp4 — видео, .exe — программа.'
+  },
+  {
+    block: 'A', type: 'choice',
+    question: 'С чего начинается полный путь к файлу в Windows (виндовс)?',
+    options: [
+      'С имени файла',
+      'С имени диска (например, C:)',
+      'С расширения файла',
+      'С папки «Мои документы»'
+    ],
+    correct: 1,
+    hint: 'Слайд 8: путь всегда начинается с имени диска, например C: или D:.'
+  },
+  {
+    block: 'A', type: 'tf',
+    question: 'В одной папке могут одновременно находиться файлы и другие папки.',
+    answer: true,
+    hint: 'Слайд 5: внутри папки могут лежать и файлы, и другие папки.'
+  },
+  {
+    block: 'A', type: 'choice',
+    question: 'Какая из перечисленных программ является прикладной?',
+    options: ['Windows (виндовс)', 'Linux (линукс)', 'Microsoft Excel (майкрософт эксель)', 'Android (андроид)'],
+    correct: 2,
+    hint: 'Windows (виндовс), Linux (линукс), Android (андроид) — это ОС. Excel (эксель) — прикладная программа для таблиц.'
+  },
+  {
+    block: 'A', type: 'choice',
+    question: 'Что происходит с файлом при удалении в Корзину?',
+    options: [
+      'Он удаляется навсегда',
+      'Он перемещается в специальную папку «Корзина»',
+      'Он копируется на флешку',
+      'Он переименовывается'
+    ],
+    correct: 1,
+    hint: 'Слайд 9: удалённый файл попадает в Корзину, откуда его можно восстановить.'
+  },
+  {
+    block: 'A', type: 'tf',
+    question: 'Имя файла может содержать точку.',
+    answer: true,
+    hint: 'Точка разделяет имя и расширение. Например: Урок.docx'
+  },
+  {
+    block: 'A', type: 'match',
+    question: 'Соотнеси программу и её назначение.',
+    pairs: [
+      { left: '📝 Word (ворд)', right: 'Работа с текстом' },
+      { left: '📊 Excel (эксель)', right: 'Работа с таблицами' },
+      { left: '📽️ PowerPoint (пауэр-пойнт)', right: 'Создание презентаций' },
+      { left: '🎨 Paint (пэйнт)', right: 'Рисование' }
+    ],
+    hint: 'Word (ворд) — текст, Excel (эксель) — таблицы, PowerPoint (пауэр-пойнт) — презентации, Paint (пэйнт) — рисование.'
+  },
+  {
+    block: 'A', type: 'choice',
+    question: 'Какое расширение имеет исполняемый файл?',
+    options: ['.txt', '.exe', '.jpg', '.mp3'],
+    correct: 1,
+    hint: 'Слайд 4: исполняемые файлы имеют расширение .exe'
+  },
+  {
+    block: 'A', type: 'tf',
+    question: 'Операционная система — это прикладная программа.',
+    answer: false,
+    hint: 'ОС — это системная программа, а не прикладная. Word (ворд), Paint (пэйнт) — прикладные.'
+  },
+
+  /* ================= БЛОК Б (5 вопросов) ================= */
+  {
+    block: 'B', type: 'choice',
+    question: 'Дан путь: C:\\Школа\\Информатика\\6_класс\\Урок.docx. В какой папке непосредственно находится файл Урок.docx?',
+    options: ['Школа', 'Информатика', '6_класс', 'C:'],
+    correct: 2,
+    hint: 'Последняя папка перед именем файла — та, в которой он лежит.'
+  },
+  {
+    block: 'B', type: 'choice',
+    question: 'Сколько файлов с расширением .jpg в списке: Море.jpg, Отчёт.docx, Лето.png, Фото.jpg, Закат.mp4, Пляж.jpg?',
+    options: ['1', '2', '3', '4'],
+    correct: 2,
+    hint: 'Считаем только .jpg: Море.jpg, Фото.jpg, Пляж.jpg — итого 3.'
+  },
+  {
+    block: 'B', type: 'choice',
+    question: 'Дан путь: D:\\Фото\\Лето\\Море.jpg. Какое имя файла вместе с расширением?',
+    options: ['Море.jpg', 'Лето', 'Фото', 'D:'],
+    correct: 0,
+    hint: 'Имя файла с расширением — это последний элемент пути.'
+  },
+  {
+    block: 'B', type: 'choice',
+    question: 'Какое имя файла записано НЕВЕРНО (содержит запрещённый символ)?',
+    options: ['Отчёт_2024.docx', 'Отчёт?2024.docx', 'Отчёт-2024.docx', 'Отчёт 2024.docx'],
+    correct: 1,
+    hint: 'Слайд 7: символ «?» входит в число запрещённых.'
+  },
+  {
+    block: 'B', type: 'choice',
+    question: 'Ученик сохранил файл Задача.py в папку «Домашняя работа», которая находится в папке «Информатика» на диске C:. Какой путь к файлу правильный?',
+    options: [
+      'C:\\Информатика\\Домашняя работа\\Задача.py',
+      'C:\\Домашняя работа\\Информатика\\Задача.py',
+      'Задача.py\\C:\\Информатика\\Домашняя работа',
+      'C:\\Задача.py\\Информатика\\Домашняя работа'
+    ],
+    correct: 0,
+    hint: 'Порядок: диск → внешняя папка → вложенная папка → файл.'
+  }
+];
+
+const testCard = document.getElementById('testCard');
+const testProgress = document.getElementById('testProgress');
+const testScore = document.getElementById('testScore');
+const testBar = document.getElementById('testBar');
+
+function updateTestHeader() {
+  const done = state.testResults.filter(r => r === true).length;
+  testScore.textContent = 'Верно: ' + done + ' / 20';
+}
+
+function startTest() {
+  state.testPhase = 'introA';
+  state.testIdx = 0;
+  state.testResults = new Array(20).fill(null);
+  showScreen('screen-test');
+  renderTestStep();
+}
+
+function renderTestStep() {
+  updateTestHeader();
+
+  if (state.testPhase === 'introA') {
+    testProgress.textContent = 'Блок А · Базовый уровень';
+    testBar.style.width = '0%';
+    renderDescriptor('A');
+    return;
+  }
+
+  if (state.testPhase === 'introB') {
+    testProgress.textContent = 'Блок Б · Продвинутый уровень';
+    testBar.style.width = '75%';
+    renderDescriptor('B');
+    return;
+  }
+
+  if (state.testPhase === 'run') {
+    const q = TEST_QUESTIONS[state.testIdx];
+    const blockLabel = q.block === 'A' ? 'Блок А' : 'Блок Б';
+    const blockStart = q.block === 'A' ? 0 : 15;
+    const inBlock = state.testIdx - blockStart + 1;
+    const blockSize = q.block === 'A' ? 15 : 5;
+    testProgress.textContent = blockLabel + ' · Вопрос ' + inBlock + ' из ' + blockSize;
+    testBar.style.width = (state.testIdx / 20 * 100) + '%';
+    renderTestQuestion(q);
+    return;
+  }
+}
+
+function renderDescriptor(block) {
+  testCard.innerHTML = '';
+
+  const desc = document.createElement('div');
+  desc.className = 'descriptor';
+
+  if (block === 'A') {
+    desc.innerHTML =
+      '<span class="block-badge">Блок А · Базовый уровень</span>' +
+      '<h3>Дескрипторы блока А (15 вопросов · максимум 8 баллов)</h3>' +
+      '<ul>' +
+        '<li>Знает, что такое операционная система, и называет её функции — <b>1 балл</b> за правильный ответ.</li>' +
+        '<li>Определяет понятия «файл», «папка», «расширение», «путь» — <b>1 балл</b>.</li>' +
+        '<li>Различает типы файлов по расширениям (.docx, .jpg, .mp3, .mp4, .exe) — <b>1 балл</b>.</li>' +
+        '<li>Называет запрещённые символы в имени файла — <b>1 балл</b>.</li>' +
+        '<li>Различает операционные и прикладные программы — <b>1 балл</b>.</li>' +
+        '<li>Понимает назначение базовых операций с файлами — <b>1 балл</b>.</li>' +
+      '</ul>' +
+      '<p style="margin-top:12px;color:#475569;">Выполнение блока А гарантирует оценку от 6 до 8 баллов.</p>';
+  } else {
+    desc.innerHTML =
+      '<span class="block-badge b">Блок Б · Продвинутый уровень</span>' +
+      '<h3>Дескрипторы блока Б (5 вопросов · до 10 баллов в сумме)</h3>' +
+      '<ul>' +
+        '<li>Анализирует полный путь к файлу и определяет расположение файла — <b>2 балла</b>.</li>' +
+        '<li>Находит файлы по маске / расширению в списке — <b>2 балла</b>.</li>' +
+        '<li>Извлекает имя файла из полного пути — <b>2 балла</b>.</li>' +
+        '<li>Находит ошибку в именовании файла (запрещённый символ) — <b>2 балла</b>.</li>' +
+        '<li>Строит правильный путь к файлу по описанию ситуации — <b>2 балла</b>.</li>' +
+      '</ul>' +
+      '<p style="margin-top:12px;color:#475569;">Прохождение блока Б позволяет получить 9 или 10 баллов.</p>';
+  }
+
+  const btn = document.createElement('button');
+  btn.className = 'btn btn-primary btn-lg';
+  btn.textContent = block === 'A' ? 'Начать блок А →' : 'Начать блок Б →';
+
+  btn.addEventListener('click', () => {
+    if (block === 'A') {
+      state.testPhase = 'run';
+      state.testIdx = 0;
+    } else {
+      state.testPhase = 'run';
+      state.testIdx = 15;
+    }
+    renderTestStep();
+  });
+
+  testCard.append(desc, btn);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function renderTestQuestion(q) {
+  testCard.innerHTML = '';
+
+  const head = document.createElement('div');
+  head.className = 'task-head';
+
+  const typeBadge = document.createElement('span');
+  typeBadge.className = 'task-type';
+  typeBadge.textContent = (q.block === 'A' ? 'Блок А' : 'Блок Б') + ' · ' + (TYPE_LABELS[q.type] || 'Вопрос');
+
+  const rightSide = document.createElement('div');
+  rightSide.className = 'task-head-right';
+  const numBadge = document.createElement('span');
+  numBadge.className = 'task-num';
+  numBadge.textContent = 'Вопрос ' + (state.testIdx + 1) + ' из 20';
+
+  const hint = createHintBlock(q.hint);
+  rightSide.append(numBadge, hint.button);
+  head.append(typeBadge, rightSide);
+
+  const qt = document.createElement('h3');
+  qt.className = 'task-question';
+  qt.textContent = q.question;
+
+  const built = buildQuestionBody(q);
+
+  const feedback = document.createElement('div');
+  feedback.className = 'feedback hidden';
+
+  const footer = document.createElement('div');
+  footer.className = 'task-footer';
+
+  const btnCheck = document.createElement('button');
+  btnCheck.className = 'btn btn-primary';
+  btnCheck.textContent = 'Ответить';
+
+  const btnNext = document.createElement('button');
+  btnNext.className = 'btn btn-green hidden';
+  btnNext.textContent = (state.testIdx === 19) ? 'Показать результат →' : 'Следующий вопрос →';
+
+  footer.append(btnCheck, btnNext);
+  testCard.append(head, hint.box, qt, built.body, feedback, footer);
+
+  btnCheck.addEventListener('click', () => {
+    const res = built.check();
+    if (!res.ready) {
+      feedback.className = 'feedback warn';
+      feedback.textContent = res.msg;
+      return;
+    }
+
+    state.testResults[state.testIdx] = res.correct;
+
+    feedback.className = 'feedback ' + (res.correct ? 'ok' : 'bad');
+    feedback.textContent = (res.correct ? '✅ Верно! +1 балл. ' : '❌ Ошибка. ') + res.msg;
+
+    if (res.correct) soundOk(); else soundBad();
+
+    btnCheck.disabled = true;
+    btnNext.classList.remove('hidden');
+    updateTestHeader();
+  });
+
+  btnNext.addEventListener('click', () => {
+    if (state.testIdx === 14) {
+      state.testPhase = 'introB';
+      renderTestStep();
+      return;
+    }
+    if (state.testIdx === 19) {
+      showFinal();
+      return;
+    }
+    state.testIdx++;
+    renderTestStep();
+  });
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* =========================================================
+   ЭТАП 4 — ФИНАЛЬНЫЙ ЭКРАН
+   ========================================================= */
+
+function showFinal() {
+  const correctTest = state.testResults.filter(r => r === true).length;
+  const correctA = state.testResults.slice(0, 15).filter(r => r === true).length;
+  const correctB = state.testResults.slice(15, 20).filter(r => r === true).length;
+
+  const scoreA = Math.round(correctA * 8 / 15);
+  const scoreB = Math.round(correctB * 2 / 5);
+  let total = scoreA + scoreB;
+  if (total > 10) total = 10;
+  if (total < 0) total = 0;
+
+  const percent = Math.round(correctTest / 20 * 100);
+  const trainerCorrect = state.taskResults.filter(r => r === true).length;
+
+  document.getElementById('finalName').textContent = state.name;
+
+  const scoreEl = document.getElementById('finalScore');
+  const circle = document.getElementById('scoreCircle');
+  scoreEl.textContent = String(total);
+
+  circle.className = 'score-circle ' +
+    (total >= 9 ? 'score-green' : total >= 7 ? 'score-blue' : total >= 5 ? 'score-yellow' : 'score-red');
+
+  document.getElementById('finalPercent').textContent = percent + '% правильных ответов в итоговом тесте';
+
+  const grid = document.getElementById('summaryGrid');
+  grid.innerHTML = '';
+
+  function addCard(title, value, detail) {
+    const c = document.createElement('div');
+    c.className = 'sum-card';
+    const h = document.createElement('h4');
+    h.textContent = title;
+    const v = document.createElement('div');
+    v.className = 'val';
+    v.textContent = value;
+    const d = document.createElement('div');
+    d.className = 'det';
+    d.textContent = detail;
+    c.append(h, v, d);
+    grid.appendChild(c);
+  }
+
+  addCard('Этап 1 · Теория', '10 / 10', 'Изучено 10 слайдов по теме');
+  addCard('Этап 2 · Тренажёр', trainerCorrect + ' / 30', 'Правильно выполнено заданий тренажёра');
+  addCard('Этап 3 · Блок А', correctA + ' / 15', 'Базовый уровень · ' + scoreA + ' из 8 баллов');
+  addCard('Этап 3 · Блок Б', correctB + ' / 5', 'Продвинутый уровень · ' + scoreB + ' из 2 баллов');
+  addCard('Итоговый тест', correctTest + ' / 20', 'Процент правильных ответов: ' + percent + '%');
+  addCard('Итоговая оценка', total + ' / 10', total >= 9 ? 'Отличный результат!' : total >= 7 ? 'Хороший результат!' : total >= 5 ? 'Удовлетворительный результат' : 'Нужно повторить тему');
+
+  showScreen('screen-final');
+}
+
+/* =========================================================
+   КНОПКА «ПРОЙТИ ЗАНОВО»
+   ========================================================= */
+
+document.getElementById('btnRestart').addEventListener('click', () => {
+  state.name = '';
+  state.slide = 0;
+  slideRead.fill(false);
+  state.taskIndex = 0;
+  state.taskResults = [];
+  state.testPhase = 'introA';
+  state.testIdx = 0;
+  state.testResults = new Array(20).fill(null);
+
+  nameInput.value = '';
+  btnStart.disabled = true;
+  loginHint.textContent = 'Введите не менее 2 символов, чтобы начать.';
+  loginHint.classList.remove('ok');
+
+  taskCard.innerHTML = '';
+  testCard.innerHTML = '';
+
+  showScreen('screen-login');
+  setTimeout(() => nameInput.focus(), 200);
+});
+</script>
+</body>
+</html>
